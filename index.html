@@ -808,6 +808,17 @@ h1.display{margin-bottom:clamp(22px,3.4vh,34px)}
 }
 a.keycap:hover{border-color:var(--accent);background:rgba(22,235,235,.09)}
 .now-note{margin-top:14px;font-size:12.5px;font-weight:300;color:var(--night-ink-3);line-height:1.7;max-width:30ch}
+/* a second keycap in the same column (Building) */
+.now-note + .keycap{margin-top:24px}
+/* short phones: the stacked column must still fit inside the pinned 100svh */
+@media (max-width:820px) and (max-height:760px){
+  .now-grid{gap:20px}
+  .now-item .h3{margin:6px 0 12px}
+  .now-item .keycap{padding:11px 18px}
+  .now-note{margin-top:9px}
+  .now-note + .keycap{margin-top:14px}
+  .now-extra{display:none}
+}
 
 /* pull quote */
 .quote{max-width:min(980px,100%)}
@@ -1092,6 +1103,32 @@ form{margin-top:0}
 
 .pill.on-night{color:#fff}
 .pill.on-night:hover{color:#062020}
+.pill[disabled]{cursor:progress;opacity:.6}
+.pill[disabled]::before{transform:translateY(101%)}
+.pill.on-night[disabled]{color:#fff}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
+.form-status{
+  margin-top:20px;
+  font-size:13px;
+  font-weight:300;
+  line-height:1.7;
+  color:var(--night-ink-2);
+  max-width:46ch;
+}
+.form-status:empty{display:none}
+.form-status.ok{color:#fff}
+.form-status.ok::before{
+  content:"";
+  display:inline-block;
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--accent);
+  margin-right:10px;
+  vertical-align:middle;
+}
+.form-status.err{color:#ffb4a8}
+.form-status a{color:#fff;border-bottom:1px solid var(--accent)}
+.field.bad input,.field.bad textarea{border-bottom-color:#ff8a78}
 .form-note{
   margin-top:20px;
   font-size:11px;
@@ -1309,6 +1346,8 @@ footer{
           <h2 class="h3">Building</h2>
           <a class="keycap" href="https://jolly-kringle-d6f72c.netlify.app/" target="_blank" rel="noopener noreferrer">TaskSpin, a spin-the-wheel to-do list ↗</a>
           <p class="now-note">For mornings when the inbox feels louder than the brain.</p>
+          <span class="keycap">Weekend quizzes for the family</span>
+          <p class="now-note now-extra">Small revision quizzes for home use: Sejarah, Bahasa Arab, English, MUET.</p>
         </div>
         <div class="now-item rv" style="--d:260ms">
           <p class="eyebrow">Now // 03</p>
@@ -1451,11 +1490,12 @@ footer{
         <h3 class="h3">Tinkerings on GitHub</h3>
         <p class="card-sub">Always small · Mostly weekends · Public</p>
         <p class="card-body body">
-          A modest collection of weekend experiments: single-file HTML tools, small scripts, and
-          the kind of thing a delivery manager builds when she wants to remember what shipping
-          actually feels like. Nothing fancy, all useful.
+          A modest collection of weekend builds, mostly revision quizzes for personal family use:
+          Sejarah, Geografi, Bahasa Arab, Pendidikan Islam, English and MUET, each one a single
+          HTML file. The kind of thing a delivery manager builds when she wants to remember what
+          shipping actually feels like. Nothing fancy, all useful.
         </p>
-        <ul class="tags"><li>HTML</li><li>JavaScript</li><li>Public</li></ul>
+        <ul class="tags"><li>Family quizzes</li><li>HTML</li><li>JavaScript</li><li>Public</li></ul>
         <div class="card-foot">
           <span class="cf">P // 03</span>
           <span class="cf-rule"></span>
@@ -1647,7 +1687,9 @@ footer{
       </div>
 
       <div class="rv" style="--d:220ms">
-        <form id="note" novalidate>
+        <form id="note" action="https://formsubmit.co/izaninsofyamohdnajib@gmail.com" method="POST" novalidate>
+          <!-- spam trap: hidden from people, bots tend to fill it -->
+          <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="field">
             <label for="name">Your name</label>
             <input id="name" name="name" type="text" autocomplete="name" placeholder="Nur Aisyah" required>
@@ -1661,12 +1703,13 @@ footer{
             <textarea id="message" name="message" rows="3" placeholder="What are you building?" required></textarea>
           </div>
           <button class="pill on-night" type="submit">
-            Send
+            <span class="send-label">Send</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </button>
+          <p class="form-status" id="note-status" role="status" aria-live="polite"></p>
           <p class="form-note">
-            This form opens your email client with a pre-filled draft. No data is stored or
-            sent to any server.
+            Your note goes straight to my inbox through FormSubmit, a small form-to-email
+            relay. Nothing is stored on this site.
           </p>
         </form>
       </div>
@@ -2211,21 +2254,120 @@ document.addEventListener('click', function(e){
   if (history.replaceState) history.replaceState(null, '', id === '#top' ? location.pathname : id);
 }, false);
 
-// mailto contact form — no backend, no data collection
-document.getElementById('note').addEventListener('submit', function(e){
-  e.preventDefault();
-  var name = document.getElementById('name').value.trim();
-  var email = document.getElementById('email').value.trim();
-  var msg  = document.getElementById('message').value.trim();
-  if (!name || !email || !msg){
-    var first = !name ? 'name' : !email ? 'email' : 'message';
-    document.getElementById(first).focus();
-    return;
+// contact form — posts to FormSubmit's AJAX endpoint, which relays the note to
+// the inbox below. The site stays static (GitHub Pages); if the relay fails,
+// the visitor gets a pre-filled mailto draft instead of a dead button.
+(function(){
+  var INBOX = 'izaninsofyamohdnajib@gmail.com';
+  var ENDPOINT = 'https://formsubmit.co/ajax/' + INBOX;
+  var form = document.getElementById('note');
+  var statusEl = document.getElementById('note-status');
+  var btn = form.querySelector('button[type="submit"]');
+  var label = btn.querySelector('.send-label');
+  var fields = {
+    name: document.getElementById('name'),
+    email: document.getElementById('email'),
+    message: document.getElementById('message')
+  };
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function say(kind, html){
+    statusEl.className = 'form-status' + (kind ? ' ' + kind : '');
+    statusEl.innerHTML = html;
   }
-  var subject = encodeURIComponent('Hello from ' + name + ': a note via your portfolio');
-  var body = encodeURIComponent(msg + '\n\nFrom ' + name + '\n' + email);
-  window.location.href = 'mailto:izaninsofyamohdnajib@gmail.com?subject=' + subject + '&body=' + body;
-});
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function mailtoHref(v){
+    var subject = encodeURIComponent('Hello from ' + v.name + ': a note via your portfolio');
+    var body = encodeURIComponent(v.message + '\n\nFrom ' + v.name + '\n' + v.email);
+    return 'mailto:' + INBOX + '?subject=' + subject + '&body=' + body;
+  }
+  function busy(on){
+    btn.disabled = on;
+    btn.setAttribute('aria-busy', on ? 'true' : 'false');
+    label.textContent = on ? 'Sending' : 'Send';
+  }
+
+  Object.keys(fields).forEach(function(k){
+    fields[k].addEventListener('input', function(){
+      fields[k].parentNode.classList.remove('bad');
+      fields[k].removeAttribute('aria-invalid');
+    });
+  });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (btn.disabled) return;
+
+    var v = {
+      name: fields.name.value.trim(),
+      email: fields.email.value.trim(),
+      message: fields.message.value.trim()
+    };
+
+    var bad = !v.name ? 'name' : !EMAIL_RE.test(v.email) ? 'email' : !v.message ? 'message' : null;
+    if (bad){
+      fields[bad].parentNode.classList.add('bad');
+      fields[bad].setAttribute('aria-invalid', 'true');
+      fields[bad].focus();
+      say('err', bad === 'email' && v.email
+        ? 'That email address doesn’t look quite right.'
+        : 'Please fill in your name, email and a quick note.');
+      return;
+    }
+
+    // honeypot filled: almost certainly a bot, so quietly pretend it worked
+    if (form.elements._honey && form.elements._honey.value){
+      form.reset();
+      say('ok', 'Thanks. Your note is on its way.');
+      return;
+    }
+
+    busy(true);
+    say('', 'Sending your note…');
+
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 15000) : null;
+
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: v.name,
+        email: v.email,
+        message: v.message,
+        _replyto: v.email,
+        _subject: 'Portfolio note from ' + v.name,
+        _template: 'table',
+        _captcha: 'false'
+      }),
+      signal: ctrl ? ctrl.signal : undefined
+    })
+    .then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(data){
+        if (!res.ok || !(data.success === true || data.success === 'true')){
+          throw new Error((data && data.message) || ('HTTP ' + res.status));
+        }
+      });
+    })
+    .then(function(){
+      form.reset();
+      say('ok', 'Thanks, ' + esc(v.name) + '. Your note is in my inbox. I usually reply within a day.');
+    })
+    .catch(function(){
+      say('err',
+        'Hmm, that didn’t go through. <a href="' + esc(mailtoHref(v)) + '">Open it as an email draft</a> ' +
+        'or write to <a href="mailto:' + INBOX + '">' + INBOX + '</a>.');
+    })
+    .then(function(){
+      if (timer) clearTimeout(timer);
+      busy(false);
+    });
+  });
+})();
 
 /* ============================================================
    8. BOOT
