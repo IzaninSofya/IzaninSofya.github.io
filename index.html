@@ -871,6 +871,9 @@ a.keycap:hover{border-color:var(--accent);background:rgba(22,235,235,.09)}
   gap:clamp(40px,6vw,92px) clamp(32px,5vw,80px);
 }
 @media (max-width:840px){.work-grid{grid-template-columns:1fr;gap:52px}}
+/* with an odd number of cards, the last one closes the grid at full width */
+.card.wide{grid-column:1 / -1}
+.card.wide .card-body{max-width:60ch}
 
 .card{display:flex;flex-direction:column;height:100%}
 .card-icon{
@@ -1436,7 +1439,32 @@ footer{
 
     <div class="work-grid">
 
-      <a class="card rv" href="https://www.instagram.com/qalbyapp/" target="_blank" rel="noopener noreferrer">
+      <a class="card rv" href="https://siiru.io/" target="_blank" rel="noopener noreferrer">
+        <div class="card-icon">
+          <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1.5" y="8" width="18" height="15" rx="1.5"/>
+            <path d="M1.5 12.4h18"/>
+            <path class="acc" d="M5 17.4h8.5"/>
+            <rect x="21.5" y="5" width="9" height="22" rx="2"/>
+            <path d="M24.6 23.4h2.8"/>
+          </svg>
+        </div>
+        <h3 class="h3">Siiru App</h3>
+        <p class="card-sub">Project delivery manager · 2026 · iOS, Android, web</p>
+        <p class="card-body body">
+          Took the Siiru app live on the App Store and Google Play, alongside the siiru.io
+          website, for a regional SaaS startup. Ran the sprint cadence, wrote PRDs, and kept
+          business, marketing, engineering, design and ops pulling toward the same release.
+        </p>
+        <ul class="tags"><li>Delivery</li><li>iOS &amp; Android</li><li>Web</li><li>Live</li></ul>
+        <div class="card-foot">
+          <span class="cf">P // 01</span>
+          <span class="cf-rule"></span>
+          <span class="arw" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <a class="card rv" style="--d:120ms" href="https://www.instagram.com/qalbyapp/" target="_blank" rel="noopener noreferrer">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="16" r="11"/>
@@ -1453,13 +1481,13 @@ footer{
         </p>
         <ul class="tags"><li>Product</li><li>Roadmap</li><li>Faith-aligned</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 01</span>
+          <span class="cf">P // 02</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
       </a>
 
-      <a class="card rv" style="--d:120ms" href="https://jolly-kringle-d6f72c.netlify.app/" target="_blank" rel="noopener noreferrer">
+      <a class="card rv" href="https://jolly-kringle-d6f72c.netlify.app/" target="_blank" rel="noopener noreferrer">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="17" r="10"/>
@@ -1476,13 +1504,13 @@ footer{
         </p>
         <ul class="tags"><li>Personal project</li><li>Live</li><li>For fun</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 02</span>
+          <span class="cf">P // 03</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
       </a>
 
-      <a class="card rv" href="https://github.com/IzaninSofya" target="_blank" rel="noopener noreferrer">
+      <a class="card rv" style="--d:120ms" href="https://github.com/IzaninSofya" target="_blank" rel="noopener noreferrer">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 10 5 16l6 6"/>
@@ -1500,13 +1528,13 @@ footer{
         </p>
         <ul class="tags"><li>Family quizzes</li><li>HTML</li><li>JavaScript</li><li>Public</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 03</span>
+          <span class="cf">P // 04</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
       </a>
 
-      <a class="card rv" style="--d:120ms" href="#contact">
+      <a class="card wide rv" href="#contact">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 22V10M12 22V6M18 22v-9"/>
@@ -1523,7 +1551,7 @@ footer{
         </p>
         <ul class="tags"><li>Available now</li><li>Remote</li><li>UTC+8</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 04</span>
+          <span class="cf">P // 05</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
