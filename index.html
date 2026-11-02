@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Izanin Sofya · Project &amp; Product Delivery</title>
-<meta name="description" content="Project and product delivery manager with five-plus years on faith-aligned digital products. Sprint cadence, PRDs, roadmaps. Muadzam Shah, Malaysia · Remote.">
+<meta name="description" content="Project and product delivery manager with five-plus years in remote product delivery. Sprint cadence, PRDs, roadmaps. Muadzam Shah, Malaysia · Open to remote roles.">
 <meta name="author" content="Izanin Sofya Mohd Najib">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0f11" media="(prefers-color-scheme: dark)">
@@ -871,6 +871,9 @@ a.keycap:hover{border-color:var(--accent);background:rgba(22,235,235,.09)}
   gap:clamp(40px,6vw,92px) clamp(32px,5vw,80px);
 }
 @media (max-width:840px){.work-grid{grid-template-columns:1fr;gap:52px}}
+/* with an odd number of cards, the last one closes the grid at full width */
+.card.wide{grid-column:1 / -1}
+.card.wide .card-body{max-width:60ch}
 
 .card{display:flex;flex-direction:column;height:100%}
 .card-icon{
@@ -1292,9 +1295,9 @@ footer{
       </h1>
       <p class="hero-sub rv" style="--d:520ms">Project &amp; product delivery manager · Muadzam Shah, Malaysia</p>
       <p class="lead hero-copy rv" style="--d:600ms">
-        Five-plus years of work on faith-aligned digital products, comfortable with both
-        Waterfall and Agile teams. I run on calm sprint cadences, well-written PRDs,
-        and reasonable amounts of coffee.
+        Five-plus years in remote product delivery, much of it on live mobile and
+        web products. Comfortable with both Waterfall and Agile teams, I run on calm sprint
+        cadences, well-written PRDs, and reasonable amounts of coffee.
       </p>
       <a class="pill rv" style="--d:680ms" href="#contact">
         Get in touch
@@ -1313,14 +1316,14 @@ footer{
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
     <span>
-      <em>Work in remote roles</em><b></b>
+      <em>Open to remote roles</em><b></b>
       <em>Muadzam Shah · UTC+8</em><b></b>
       <em>EN · BM · ID</em><b></b>
       <em>Sprint planning · PRDs · Roadmaps</em><b></b>
       <em>Sincerity, Excellence, Accountability</em><b></b>
     </span>
     <span>
-      <em>Work in remote roles</em><b></b>
+      <em>Open to remote roles</em><b></b>
       <em>Muadzam Shah · UTC+8</em><b></b>
       <em>EN · BM · ID</em><b></b>
       <em>Sprint planning · PRDs · Roadmaps</em><b></b>
@@ -1337,15 +1340,15 @@ footer{
       <div class="now-grid">
         <div class="now-item rv">
           <p class="eyebrow">Now // 01</p>
-          <h2 class="h3">Working on</h2>
-          <span class="keycap">Delivery at a regional SaaS startup</span>
-          <p class="now-note">Siiru Tech — sprint cadence, PRDs, and dependency tracking across distributed teams.</p>
+          <h2 class="h3">Looking for</h2>
+          <span class="keycap">My next remote role</span>
+          <p class="now-note">Project or product delivery, or technical customer support. Full-time or contract.</p>
         </div>
         <div class="now-item rv" style="--d:130ms">
           <p class="eyebrow">Now // 02</p>
-          <h2 class="h3">Building</h2>
+          <h2 class="h3">Shipped &amp; building</h2>
           <a class="keycap" href="https://jolly-kringle-d6f72c.netlify.app/" target="_blank" rel="noopener noreferrer">TaskSpin, a spin-the-wheel to-do list ↗</a>
-          <p class="now-note">For mornings when the inbox feels louder than the brain.</p>
+          <p class="now-note">Shipped and live. The first one, and the reason there's always a next one.</p>
           <a class="keycap" href="https://linktr.ee/izaninsofya" target="_blank" rel="noopener noreferrer">Weekend quizzes for the family ↗</a>
           <p class="now-note now-extra">Small revision quizzes for home use: Sejarah, Bahasa Arab, English, MUET.</p>
         </div>
@@ -1379,15 +1382,18 @@ footer{
             For the last five years I've helped small, fully-remote product teams ship things
             they're proud of, most of that time at QalbyApp, a faith-based mobile product where
             I owned a three-year roadmap across an app, two websites, and a community portal.
-            These days I'm a product delivery manager at Siiru, a regional SaaS startup, where
-            I translate business goals into PRDs, sprint plans, and the kind of unglamorous
-            follow-ups that keep things moving.
+            Most recently I was a project delivery manager at Siiru Tech, a regional SaaS startup,
+            where the work covered the product side too: translating business goals into PRDs,
+            sprint plans, and the kind of unglamorous follow-ups that keep things moving.
+            I'm now looking for my next remote role.
           </p>
           <p>
             I work best where the work is values-driven, the timezones are forgiving, and the
-            team treats clarity as a kindness. Outside of work I'm slowly building TaskSpin, a
+            team treats clarity as a kindness. On the side I built and shipped TaskSpin, a
             spin-the-wheel to-do list for mornings when the inbox feels louder than the brain.
-            A small reminder that calm and play can sit at the same desk.
+            It was my first personal project to make it all the way to live, and it started a
+            habit: most weekends there's another small build on the go. A small reminder that
+            calm and play can sit at the same desk.
           </p>
         </div>
       </div>
@@ -1433,7 +1439,32 @@ footer{
 
     <div class="work-grid">
 
-      <a class="card rv" href="https://www.instagram.com/qalbyapp/" target="_blank" rel="noopener noreferrer">
+      <a class="card rv" href="https://siiru.io/" target="_blank" rel="noopener noreferrer">
+        <div class="card-icon">
+          <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1.5" y="8" width="18" height="15" rx="1.5"/>
+            <path d="M1.5 12.4h18"/>
+            <path class="acc" d="M5 17.4h8.5"/>
+            <rect x="21.5" y="5" width="9" height="22" rx="2"/>
+            <path d="M24.6 23.4h2.8"/>
+          </svg>
+        </div>
+        <h3 class="h3">Siiru App</h3>
+        <p class="card-sub">Operations, then project delivery · 2025–2026 · iOS, Android, web</p>
+        <p class="card-body body">
+          Took the Siiru app live on the App Store and Google Play, alongside the siiru.io
+          website, for a regional SaaS startup. Ran the sprint cadence, wrote PRDs, and kept
+          business, marketing, engineering, design and ops pulling toward the same release.
+        </p>
+        <ul class="tags"><li>Delivery</li><li>iOS &amp; Android</li><li>Web</li><li>Live</li></ul>
+        <div class="card-foot">
+          <span class="cf">P // 01</span>
+          <span class="cf-rule"></span>
+          <span class="arw" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <a class="card rv" style="--d:120ms" href="https://www.instagram.com/qalbyapp/" target="_blank" rel="noopener noreferrer">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="16" r="11"/>
@@ -1450,13 +1481,13 @@ footer{
         </p>
         <ul class="tags"><li>Product</li><li>Roadmap</li><li>Faith-aligned</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 01</span>
+          <span class="cf">P // 02</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
       </a>
 
-      <a class="card rv" style="--d:120ms" href="https://jolly-kringle-d6f72c.netlify.app/" target="_blank" rel="noopener noreferrer">
+      <a class="card rv" href="https://jolly-kringle-d6f72c.netlify.app/" target="_blank" rel="noopener noreferrer">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="17" r="10"/>
@@ -1473,13 +1504,13 @@ footer{
         </p>
         <ul class="tags"><li>Personal project</li><li>Live</li><li>For fun</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 02</span>
+          <span class="cf">P // 03</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
       </a>
 
-      <a class="card rv" href="https://github.com/IzaninSofya" target="_blank" rel="noopener noreferrer">
+      <a class="card rv" style="--d:120ms" href="https://github.com/IzaninSofya" target="_blank" rel="noopener noreferrer">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 10 5 16l6 6"/>
@@ -1497,13 +1528,13 @@ footer{
         </p>
         <ul class="tags"><li>Family quizzes</li><li>HTML</li><li>JavaScript</li><li>Public</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 03</span>
+          <span class="cf">P // 04</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
       </a>
 
-      <a class="card rv" style="--d:120ms" href="#contact">
+      <a class="card wide rv" href="#contact">
         <div class="card-icon">
           <svg viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 22V10M12 22V6M18 22v-9"/>
@@ -1512,15 +1543,15 @@ footer{
           </svg>
         </div>
         <h3 class="h3">Next thing</h3>
-        <p class="card-sub">Open to remote work · Consulting or collaboration</p>
+        <p class="card-sub">Open to remote roles · Full-time or contract</p>
         <p class="card-body body">
           Still writing this one. If you have a fuzzy project that needs scope, a roadmap that
-          needs holding, or a team that needs someone to ask the boring questions early — that's
-          the work I'm looking for.
+          needs holding, a team that needs someone to ask the boring questions early, or users
+          who need a patient hand with a technical issue — that's the work I'm looking for.
         </p>
-        <ul class="tags"><li>Available</li><li>Remote</li><li>UTC+8</li></ul>
+        <ul class="tags"><li>Available now</li><li>Remote</li><li>UTC+8</li></ul>
         <div class="card-foot">
-          <span class="cf">P // 04</span>
+          <span class="cf">P // 05</span>
           <span class="cf-rule"></span>
           <span class="arw" aria-hidden="true">→</span>
         </div>
@@ -1539,7 +1570,7 @@ footer{
       <div class="stats">
         <div class="stat rv">
           <div class="n">5<span>+</span></div>
-          <p class="l">Years managing faith-aligned digital products</p>
+          <p class="l">Years in remote product delivery</p>
         </div>
         <div class="stat rv" style="--d:110ms">
           <div class="n">3</div>
@@ -1571,8 +1602,8 @@ footer{
     </p>
 
     <div class="xp">
-      <article class="xp-item now rv">
-        <div class="xp-date">Feb 2026 — Present</div>
+      <article class="xp-item rv">
+        <div class="xp-date">Feb 2026 — Oct 2026</div>
         <div>
           <h3 class="xp-role">Project Delivery Manager</h3>
           <p class="xp-org">Siiru Tech · Remote</p>
@@ -1657,9 +1688,9 @@ footer{
     <div class="contact-grid">
       <div>
         <p class="lead rv" style="color:var(--night-ink-2);max-width:46ch;margin-bottom:clamp(30px,4.4vh,44px)">
-          I'm currently working on remote projects and happy to chat about consulting,
-          collaboration, or just shipping things together. Email is the quickest way to
-          reach me. I usually reply within a day.
+          I'm open to remote roles, full-time or contract: project or product delivery,
+          or technical customer support. Happy to chat about consulting or collaboration
+          too. Email is the quickest way to reach me. I usually reply within a day.
         </p>
 
         <div class="links rv" style="--d:120ms">
