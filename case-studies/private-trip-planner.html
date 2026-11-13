@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Private Trip Planner · Case study · Izanin Sofya</title>
+<meta name="description" content="How I used AI to prototype a multi-day trip planner that replaced manual bookings, handed it to the team, then rebuilt it as a private planner locked by a trip code.">
+<meta name="author" content="Izanin Sofya Mohd Najib">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Private Trip Planner · Case study">
+<meta property="og:description" content="From manual multi-day bookings to a shared planner, prototyped with AI.">
+<meta property="og:url" content="https://izaninsofya.github.io/case-studies/private-trip-planner.html">
+<meta property="og:image" content="https://izaninsofya.github.io/assets/case-studies/trip-planner/itinerary-top.webp">
+<link rel="canonical" href="https://izaninsofya.github.io/case-studies/private-trip-planner.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23242424'/%3E%3Ctext x='16' y='21.5' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' letter-spacing='0.5' fill='%23ffffff'%3EIS%3C/text%3E%3Crect x='9' y='24.5' width='14' height='2' rx='1' fill='%2316ebeb'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600&display=swap">
+<style>
+/* Tokens and type are copied from the home page so the two read as one site. */
+:root{
+  --paper:#ffffff;
+  --tint:#f6f7f7;
+  --ink:#242424;
+  --ink-2:#656565;
+  --ink-3:#767676;
+  --line:#e4e4e4;
+  --accent:#16ebeb;
+  --accent-deep:#0aa8a8;
+  --night:#0b0f11;
+  --night-line:rgba(255,255,255,.16);
+  --night-ink-2:rgba(255,255,255,.66);
+  --night-ink-3:rgba(255,255,255,.52);
+  --ff:'Rubik','Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --pad:clamp(20px,5vw,88px);
+  --maxw:1320px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body,h1,h2,h3,h4,p,ul,ol,li,figure,blockquote,dl,dd{margin:0;padding:0}
+ul,ol{list-style:none}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+body{
+  font-family:var(--ff);font-weight:400;font-size:15px;line-height:1.78;
+  color:var(--ink);background:var(--paper);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;
+}
+::selection{background:var(--accent);color:#062020}
+:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-radius:2px}
+
+.eyebrow{font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;line-height:1.6;color:var(--ink-3)}
+.display{font-weight:300;font-size:clamp(2.1rem,6.4vw,5rem);line-height:1;letter-spacing:.012em;text-transform:uppercase}
+.h2{font-weight:400;font-size:clamp(1.15rem,2.1vw,1.5rem);line-height:1.25;letter-spacing:.16em;text-transform:uppercase}
+.h3{font-weight:400;font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.35;letter-spacing:.15em;text-transform:uppercase}
+.lead{font-size:clamp(1rem,1.25vw,1.18rem);line-height:1.8;color:var(--ink-2);font-weight:300}
+.body{color:var(--ink-2);font-weight:300}
+.wrap{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad)}
+
+/* ---------- Top bar ---------- */
+header{
+  position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-block:18px}
+.brand{font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;white-space:nowrap}
+.brand span{color:var(--ink-3)}
+.bar nav{display:flex;gap:clamp(14px,2vw,30px)}
+.bar nav a{font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);padding:4px 0;border-bottom:1px solid transparent;transition:color .3s var(--ease),border-color .3s var(--ease)}
+.bar nav a:hover{color:var(--ink);border-color:var(--accent)}
+@media (max-width:720px){.bar nav a.star{display:none}}
+
+/* ---------- Hero ---------- */
+.hero{padding-block:clamp(56px,10vh,120px) clamp(40px,6vh,72px)}
+.hero .eyebrow{margin-bottom:22px}
+.hero .lead{max-width:60ch;margin-top:26px}
+.meta{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px clamp(20px,3vw,48px);
+  margin-top:clamp(36px,6vh,64px);padding-top:26px;border-top:1px solid var(--line);
+}
+.meta dt{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.meta dd{font-size:14px;line-height:1.6}
+@media (max-width:820px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- Screens ---------- */
+.shot{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 24px 60px -34px rgba(11,15,17,.35)}
+.shot .chrome{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--tint)}
+.shot .chrome i{width:8px;height:8px;border-radius:50%;background:#d3d3d3}
+.shot .chrome span{margin-left:10px;font-size:10px;font-weight:500;letter-spacing:.08em;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shot img{width:100%;height:auto}
+.shot.tall .view{max-height:min(78vh,760px);overflow-y:auto;overscroll-behavior:contain}
+figure figcaption{margin-top:14px;font-size:13px;line-height:1.65;color:var(--ink-2);font-weight:300;max-width:70ch}
+figure figcaption b{font-weight:500;color:var(--ink)}
+.phone{width:min(100%,300px);border:1px solid var(--line);border-radius:30px;padding:10px;background:#fff;box-shadow:0 24px 60px -34px rgba(11,15,17,.35)}
+.phone .view{border-radius:21px;overflow:hidden;max-height:560px;overflow-y:auto;overscroll-behavior:contain}
+.phone img{width:100%;height:auto}
+
+/* ---------- Sections ---------- */
+.sec{padding-block:clamp(64px,10vh,128px)}
+.sec.tint{background:var(--tint)}
+.sec-head{display:flex;align-items:baseline;gap:clamp(14px,2vw,26px);margin-bottom:clamp(30px,5vh,56px)}
+.sec-head .h2{white-space:nowrap}
+.sec-head .rule{flex:1;height:1px;background:var(--line)}
+.sec-head .idx{font-size:10px;font-weight:600;letter-spacing:.2em;color:var(--ink-3);white-space:nowrap}
+.letter{display:inline-grid;place-items:center;width:34px;height:34px;border:1px solid var(--ink);border-radius:50%;font-size:13px;font-weight:500;letter-spacing:0;margin-right:14px;transform:translateY(-2px)}
+.cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(32px,5vw,88px);align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.prose > * + *{margin-top:18px}
+.prose p{color:var(--ink-2);font-weight:300;max-width:62ch}
+.prose p.lead{color:var(--ink)}
+.prose strong{font-weight:500;color:var(--ink)}
+.todo{background:#fff6d6;border:1px dashed #d9a400;border-radius:4px;padding:1px 6px;color:#5c4500;font-weight:400;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+
+/* flow of steps */
+.flow{display:grid;gap:10px;counter-reset:f}
+.flow li{counter-increment:f;display:grid;grid-template-columns:34px 1fr;gap:16px;align-items:start;padding:16px 18px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.flow li::before{content:counter(f,decimal-leading-zero);font-size:10px;font-weight:600;letter-spacing:.2em;color:var(--ink-3);padding-top:4px}
+.flow b{display:block;font-weight:500;font-size:14px}
+.flow span{display:block;font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.6}
+.flow li.pain{border-color:#e9b9b4;background:#fff8f7}
+.flow-note{margin-top:14px;font-size:12px;color:var(--ink-3)}
+
+.goals{display:grid;gap:0;border-top:1px solid var(--line)}
+.goals li{display:grid;grid-template-columns:120px 1fr;gap:20px;padding:18px 0;border-bottom:1px solid var(--line)}
+.goals b{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);padding-top:4px}
+.goals span{color:var(--ink-2);font-weight:300}
+@media (max-width:520px){.goals li{grid-template-columns:1fr;gap:4px}}
+
+/* action steps */
+.step{padding-block:clamp(40px,6vh,72px);border-top:1px solid var(--line)}
+.step:first-of-type{border-top:0;padding-top:0}
+.step-tag{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.step-tag i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.loop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.loop li{border:1px solid var(--line);border-radius:8px;padding:18px;background:#fff}
+.loop b{display:block;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
+.loop span{font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.6;display:block}
+@media (max-width:900px){.loop{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.loop{grid-template-columns:1fr}}
+.quote{border-left:2px solid var(--accent);padding:6px 0 6px 20px;font-size:14px;color:var(--ink-2);font-weight:300;max-width:62ch}
+.quote cite{display:block;margin-top:8px;font-style:normal;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,4vw,56px);margin-top:clamp(32px,5vh,56px)}
+.gallery .wide{grid-column:1 / -1}
+@media (max-width:860px){.gallery{grid-template-columns:1fr}}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(24px,4vw,56px);align-items:start}
+@media (max-width:860px){.duo{grid-template-columns:1fr}.duo .phone{margin-inline:auto}}
+.disclaimer{margin-top:clamp(32px,5vh,56px);border-left:2px solid var(--accent);background:#fff;padding:18px 22px;font-size:13.5px;line-height:1.7;color:var(--ink-2);font-weight:300;max-width:78ch}
+.disclaimer b{display:block;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+.disclaimer + .gallery{margin-top:clamp(24px,4vh,40px)}
+.scope{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:14px;margin-top:28px}
+.scope-col{border:1px solid var(--line);border-radius:8px;background:#fff;padding:24px}
+.scope-col.new{border-color:var(--ink)}
+.scope-col .eyebrow{margin-bottom:14px}
+.scope-col.new .eyebrow{color:var(--accent-deep)}
+.scope-col ul{display:grid;gap:10px}
+.scope-col li{position:relative;padding-left:20px;font-size:14px;line-height:1.6;color:var(--ink-2);font-weight:300}
+.scope-col li::before{content:"";position:absolute;left:0;top:.8em;width:8px;height:1px;background:var(--ink-3)}
+.scope-col li b{font-weight:500;color:var(--ink)}
+@media (max-width:820px){.scope{grid-template-columns:1fr}}
+.themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:700px){.themes{grid-template-columns:1fr}}
+.pending{border:1px dashed #d9a400;border-radius:10px;background:#fffbea;padding:26px;color:#5c4500;font-size:13px;line-height:1.7}
+.pending b{display:block;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+
+/* access model */
+.access{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:stretch;margin-top:28px}
+.access .box{border:1px solid var(--line);border-radius:8px;padding:20px;background:#fff}
+.access .box b{display:block;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.access .box p{font-size:14px;line-height:1.55}
+.access .box small{display:block;margin-top:8px;font-size:12.5px;color:var(--ink-2);font-weight:300;line-height:1.6}
+.access .box.lock{background:var(--night);border-color:var(--night);color:#fff}
+.access .box.lock b{color:var(--accent)}
+.access .box.lock small{color:var(--night-ink-2)}
+.access .arr{display:grid;place-items:center;color:var(--ink-3);font-size:18px}
+@media (max-width:900px){.access{grid-template-columns:1fr}.access .arr{transform:rotate(90deg);padding:2px 0}}
+
+.compare{width:100%;border-collapse:collapse;margin-top:28px;font-size:14px}
+.compare th,.compare td{text-align:left;padding:14px 16px 14px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.compare th{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+.compare td{color:var(--ink-2);font-weight:300}
+.compare td:first-child{color:var(--ink);font-weight:400;width:26%}
+.tbl-scroll{overflow-x:auto}
+
+/* results */
+.results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,44px)}
+.results li{border-top:1px solid var(--ink);padding-top:20px}
+.results b{display:block;font-weight:300;font-size:clamp(1.3rem,2.4vw,1.9rem);line-height:1.2;margin-bottom:12px}
+.results span{color:var(--ink-2);font-weight:300;font-size:14px;display:block}
+@media (max-width:820px){.results{grid-template-columns:1fr}}
+.learn{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(24px,4vw,64px);margin-top:clamp(40px,7vh,80px)}
+@media (max-width:820px){.learn{grid-template-columns:1fr}}
+.learn ul{display:grid;gap:12px;margin-top:16px}
+.learn li{position:relative;padding-left:20px;color:var(--ink-2);font-weight:300}
+.learn li::before{content:"";position:absolute;left:0;top:.8em;width:8px;height:1px;background:var(--ink-3)}
+
+/* closing */
+.cta{background:var(--night);color:#fff;padding-block:clamp(72px,12vh,140px)}
+.cta .lead{color:var(--night-ink-2);max-width:52ch;margin-top:18px}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;padding:14px 22px;border:1px solid var(--night-line);border-radius:999px;transition:border-color .3s var(--ease),background .3s var(--ease),color .3s var(--ease)}
+.btn:hover{border-color:var(--accent)}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:#062020}
+.btn.solid:hover{background:#fff;border-color:#fff}
+footer{background:var(--night);color:var(--night-ink-3);border-top:1px solid var(--night-line);padding:clamp(28px,4vh,44px) 0}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
+.foot a{color:var(--night-ink-2)}
+.foot a:hover{color:#fff}
+
+.rv{opacity:0;transform:translate3d(0,22px,0);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+.no-js .rv{opacity:1;transform:none}
+</style>
+</head>
+<body class="no-js">
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="../index.html#work"><span aria-hidden="true">←</span> <b>Izanin Sofya</b> <span>/ Work</span></a>
+    <nav aria-label="Case study sections">
+      <a class="star" href="#situation">Situation</a>
+      <a class="star" href="#task">Task</a>
+      <a class="star" href="#action">Action</a>
+      <a class="star" href="#result">Result</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Case study · Built with AI</p>
+    <h1 class="display">Private<br>Trip Planner</h1>
+    <p class="lead">
+      Multi-day private bookings at Siiru were planned by hand. I used AI to prototype a planner that
+      put the whole trip on one shared board, handed it to the team, then rebuilt my own version
+      that only the travelling group can open.
+    </p>
+    <dl class="meta">
+      <div><dt>My role</dt><dd>Problem framing, prototype, testing, handoff, rebuild</dd></div>
+      <div><dt>When</dt><dd>Prototype, Sep 2026 · Rebuild, Nov 2026</dd></div>
+      <div><dt>Built with</dt><dd>Claude Code, one HTML file, Supabase, Netlify</dd></div>
+      <div><dt>Status</dt><dd>Prototype adopted by Siiru · Rebuild is my own</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section style="padding-bottom:clamp(56px,9vh,112px)">
+  <div class="wrap">
+    <figure class="duo rv">
+      <div>
+        <div class="shot">
+          <div class="chrome"><i></i><i></i><i></i><span>Private Trip Planner · Itinerary</span></div>
+          <img src="../assets/case-studies/trip-planner/itinerary-top.webp" width="1600" height="1025" alt="The planner's itinerary board for a five-day Kyoto and Osaka trip, with day one's stops listed by time.">
+        </div>
+        <figcaption><b>The rebuilt planner.</b> Every screen on this page is the real app, filled with an invented demo trip.</figcaption>
+      </div>
+      <div class="phone" aria-label="The same itinerary on a phone">
+        <div class="view" tabindex="0"><img src="../assets/case-studies/trip-planner/itinerary-phone.webp" width="780" height="4000" loading="lazy" alt="The itinerary board on a phone-width screen."></div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== SITUATION ===================== -->
+<section class="sec tint" id="situation">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="h2"><span class="letter">S</span>Situation</h2>
+      <span class="rule"></span><span class="idx">// 01</span>
+    </div>
+    <div class="cols">
+      <div class="prose rv">
+        <p class="lead">A private trip is not one booking. It is a plan that runs over several days, and every day has its own stops, times and costs.</p>
+        <p>
+          At Siiru, these multi-day plans were put together manually. Support and Sales collected what
+          the customer wanted, built the itinerary by hand in Google Workspace, and sent it back for review.
+        </p>
+        <p>
+          The slow part was not writing the first plan. It was every change after it. One swapped day
+          meant editing the plan, exporting it again and sending a new copy, while older copies were
+          still sitting in people's chats.
+        </p>
+        <p>
+          Customers sent their requests, edits and extra details to Support over WhatsApp, and
+          <strong>more than ten rounds of changes</strong> on one booking was normal. A booking was never
+          really finished. It stayed a work in progress until the day the customer travelled.
+        </p>
+      </div>
+      <div class="rv">
+        <p class="eyebrow" style="margin-bottom:16px">How a multi-day booking moved, before</p>
+        <ol class="flow">
+          <li><div><b>Enquiry arrives</b><span>Dates, group size and wishes come in over WhatsApp.</span></div></li>
+          <li><div><b>Plan built by hand</b><span>Support or Sales types the day-by-day itinerary into a spreadsheet.</span></div></li>
+          <li><div><b>Exported and sent</b><span>A fixed copy goes to the customer to review.</span></div></li>
+          <li class="pain"><div><b>Changes come back</b><span>Edit, export, resend. Ten rounds or more, right up to the travel date.</span></div></li>
+          <li class="pain"><div><b>Copies drift apart</b><span>Nobody is sure which version is the current one.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TASK ===================== -->
+<section class="sec" id="task">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="h2"><span class="letter">T</span>Task</h2>
+      <span class="rule"></span><span class="idx">// 02</span>
+    </div>
+    <div class="cols">
+      <div class="prose rv">
+        <p class="lead">Show that one live plan could replace the back-and-forth, without asking engineering for time first.</p>
+        <p>
+          I manage delivery. I am not an engineer. So the task I set myself was narrow: build something
+          real enough for the team to click through and judge, quickly, and let the prototype make the
+          argument that a document could not.
+        </p>
+      </div>
+      <ul class="goals rv">
+        <li><b>Goal</b><span>A multi-day plan that lives at one link and is always the current version.</span></li>
+        <li><b>For whom</b><span>The team building the plan, and the group who will travel on it.</span></li>
+        <li><b>Constraint</b><span>No engineering time and no budget. It had to be something I could build and change myself.</span></li>
+        <li><b>Done when</b><span>The team could use it on a real multi-day booking and decide whether to build it properly.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ACTION ===================== -->
+<section class="sec tint" id="action">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="h2"><span class="letter">A</span>Action</h2>
+      <span class="rule"></span><span class="idx">// 03</span>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-tag"><i></i><span class="eyebrow">Step 1 · Prototype with AI</span></div>
+      <div class="cols">
+        <div class="prose rv">
+          <h3 class="h3">I wrote the brief. AI wrote the code.</h3>
+          <p>
+            I treated the AI like a developer on my team. It got what I would give any developer: the
+            problem, who it is for, what a finished screen must do, and what to leave out. Then I
+            tested each version the way a customer would, and sent back what broke.
+          </p>
+          <p>
+            Keeping the whole planner in one HTML file was a deliberate choice. There was nothing to
+            install and nothing to deploy. I could open it, test it and share it in the same minute.
+          </p>
+          <p>
+            I built it with <strong>Claude Code</strong>. Version one of the prototype took
+            <strong>one day</strong>.
+          </p>
+        </div>
+        <div class="rv">
+          <ul class="loop">
+            <li><b>Frame</b><span>Write the problem and the user in plain words before any screen.</span></li>
+            <li><b>Prompt</b><span>Ask for one working slice at a time, not the whole product.</span></li>
+            <li><b>Test</b><span>Plan a real trip in it. Note every point where I hesitated.</span></li>
+            <li><b>Tighten</b><span>Send the notes back. Cut anything the trip did not need.</span></li>
+          </ul>
+          <blockquote class="quote" style="margin-top:24px">
+            &ldquo;Plan and challenge my requests, do not commit without my approval.&rdquo;
+            <cite>My standing instruction to Claude Code</cite>
+          </blockquote>
+          <p class="body" style="margin-top:16px;font-size:14px;max-width:62ch">
+            That one line set the working relationship. The AI had to push back on a weak request
+            before building it, and nothing was saved until I had read it and agreed.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-tag"><i></i><span class="eyebrow">Step 2 · Handoff</span></div>
+      <div class="cols">
+        <div class="prose rv">
+          <h3 class="h3">The prototype became Siiru's.</h3>
+          <p>
+            The original prototype now belongs to Siiru. The team used it as the starting point for an
+            integrated system that connects trip planning with their other services.
+          </p>
+          <p>
+            That is the outcome a prototype should have. It did its job when it stopped being mine. It is
+            also why none of its screens appear on this page.
+          </p>
+        </div>
+        <div class="rv">
+          <ul class="goals">
+            <li><b>Handed over</b><span>The working prototype and the thinking behind each screen, in my final month at Siiru.</span></li>
+            <li><b>Used for</b><span>The base of an integrated planning system inside Siiru.</span></li>
+            <li><b>Not shown</b><span>Anything that belongs to Siiru or its customers.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-tag"><i></i><span class="eyebrow">Step 3 · Rebuild</span></div>
+      <div class="prose rv">
+        <h3 class="h3">I rebuilt it from scratch, for the people on the trip.</h3>
+        <p>
+          I still wanted a planner for my own trips, so I built a new one. It shares the idea with the
+          first prototype and none of the code.
+        </p>
+        <p>
+          The Siiru prototype was built for a booking process. It held the itinerary for several days
+          and locations, remarks on each stop, and the appointed vendor's details. That was the right
+          scope for the team. It was not enough for a group of friends or a family, who also need to
+          decide together, share the tasks and split the bill.
+        </p>
+        <p>
+          So the rebuild adds the personal parts, lets each trip look the way the group likes, and puts
+          a wall in front of all of it.
+        </p>
+      </div>
+
+      <div class="scope rv">
+        <div class="scope-col">
+          <p class="eyebrow">Prototype at Siiru</p>
+          <ul>
+            <li>Itinerary across several days and locations</li>
+            <li>Remarks on each stop</li>
+            <li>Appointed vendor information</li>
+          </ul>
+        </div>
+        <div class="scope-col new">
+          <p class="eyebrow">My rebuild adds</p>
+          <ul>
+            <li><b>Ideas tab.</b> Suggest places and vote before anything is scheduled.</li>
+            <li><b>Checklist.</b> What to book, buy or pack, and who has claimed it.</li>
+            <li><b>Cost sharing.</b> Planned totals, who paid what, and who owes whom.</li>
+            <li><b>Three themes.</b> Japan, Seaside or Tropical, chosen per trip.</li>
+            <li><b>Security wall.</b> A trip code that only group members hold.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="prose rv" style="margin-top:clamp(36px,6vh,64px)">
+        <h3 class="h3">The harder question: who should be allowed in?</h3>
+        <p>
+          A trip plan is more personal than it looks. It says who is travelling, where they sleep each
+          night, and which days their home is empty. A link is easy to forward and hard to take back,
+          so a link on its own could not be the lock.
+        </p>
+        <p>
+          I weighed three options. <strong>An open link</strong> is the easiest to use and protects
+          nobody. <strong>Accounts and passwords</strong> are safe, but nobody in a family group wants
+          to sign up for a holiday. <strong>A shared code</strong> sits between the two. It works like
+          a Wi-Fi password, which every group already understands.
+        </p>
+        <p>
+          A code raises its own questions, so I answered those too. If someone leaves the group, the
+          creator changes the code and the old one stops working at once. If the code is lost, it
+          cannot be read back, only replaced, because it is never stored in readable form. And only
+          the creator can change it, using a second key that stays in their own browser.
+        </p>
+        <p>
+          The result is a <strong>trip code</strong>. Each trip has its own link and its own code.
+          A person needs both. The link alone opens a lock screen and nothing else.
+        </p>
+      </div>
+
+      <div class="access rv" role="group" aria-label="How access to a trip works">
+        <div class="box"><b>What a member has</b><p>The trip link and the trip code</p><small>Sent in two separate chats. The code is remembered on that device after the first entry.</small></div>
+        <div class="arr" aria-hidden="true">→</div>
+        <div class="box"><b>What the page can do</b><p>Call six database functions</p><small>Five check the trip code first. Changing the code needs the creator's own key instead.</small></div>
+        <div class="arr" aria-hidden="true">→</div>
+        <div class="box lock"><b>What stays locked</b><p>The tables themselves</p><small>No direct reads or writes. Codes are stored as bcrypt hashes, so a lost code is replaced, never read back.</small></div>
+      </div>
+
+      <div class="tbl-scroll rv">
+        <table class="compare">
+          <thead><tr><th>What the rebuild adds</th><th>Why it matters to the group</th></tr></thead>
+          <tbody>
+            <tr><td>Trip code on every trip</td><td>Only group members can open or edit the plan.</td></tr>
+            <tr><td>Creator-only "Change code"</td><td>Removing someone is one step: change the code and send the new one to those who stay.</td></tr>
+            <tr><td>Live updates</td><td>An edit on one phone shows on everyone's board as it happens.</td></tr>
+            <tr><td>Ideas and votes</td><td>The group decides together before anything goes on a day.</td></tr>
+            <tr><td>Checklist with owners</td><td>Each task to book or buy has a name next to it.</td></tr>
+            <tr><td>Costs and settle-up</td><td>The board works out who owes whom.</td></tr>
+            <tr><td>Three colour themes</td><td>The trip feels like the group's own, not a company form.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="disclaimer rv" role="note">
+        <b>About these screens</b>
+        None of this is a real trip or plan. The people, places, dates and costs are invented for the demo,
+        and any discrepancy is intentional, for discussion purposes. The planner itself is private and is
+        not open to the public.
+      </p>
+
+      <div class="gallery">
+        <figure class="wide rv">
+          <div class="shot">
+            <div class="chrome"><i></i><i></i><i></i><span>Start a new trip</span></div>
+            <img src="../assets/case-studies/trip-planner/home.webp" width="1600" height="950" loading="lazy" alt="The planner's start screen with a form for trip name, destination, dates, your name, currency and a generated trip code.">
+          </div>
+          <figcaption><b>Start.</b> A short form creates a trip with one day per date and a trip code already filled in. No account and no sign-up.</figcaption>
+        </figure>
+
+        <figure class="wide rv">
+          <div class="shot">
+            <div class="chrome"><i></i><i></i><i></i><span>Opening a trip link without the code</span></div>
+            <img src="../assets/case-studies/trip-planner/lock.webp" width="1600" height="720" loading="lazy" alt="The lock screen titled Enter the trip code, with fields for the trip code and your name.">
+          </div>
+          <figcaption><b>Lock screen.</b> The link on its own shows only this. A wrong code and a wrong link give the same answer, so the page reveals nothing about which trips exist.</figcaption>
+        </figure>
+
+        <figure class="rv">
+          <div class="shot">
+            <div class="chrome"><i></i><i></i><i></i><span>Invite the group</span></div>
+            <img src="../assets/case-studies/trip-planner/invite.webp" width="1320" height="990" loading="lazy" alt="The Invite the group panel showing the trip link, the trip code, and buttons to copy each one or change the code.">
+          </div>
+          <figcaption><b>Invite.</b> Link and code are copied separately, so they can travel in different chats. The link is blurred, and the code in this picture has since been changed and no longer works.</figcaption>
+        </figure>
+
+        <figure class="rv">
+          <div class="shot">
+            <div class="chrome"><i></i><i></i><i></i><span>Change the trip code</span></div>
+            <img src="../assets/case-studies/trip-planner/change-code.webp" width="1320" height="990" loading="lazy" alt="The Change the trip code panel with a hidden creator key field and a new trip code field.">
+          </div>
+          <figcaption><b>Change code.</b> Only the trip creator sees this. The old code stops working at once. I hid the creator key for this picture.</figcaption>
+        </figure>
+
+        <figure class="wide rv">
+          <div class="shot tall">
+            <div class="chrome"><i></i><i></i><i></i><span>Itinerary · scroll inside the frame</span></div>
+            <div class="view" tabindex="0"><img src="../assets/case-studies/trip-planner/itinerary.webp" width="1600" height="2250" loading="lazy" alt="The full itinerary board showing day one and day two, each stop with a time, type, cost, remarks and an I'm in count."></div>
+          </div>
+          <figcaption><b>Itinerary.</b> The multi-day plan the old process kept in a spreadsheet. Stops can be dragged between days, and each day shows its own total and a route in Maps.</figcaption>
+        </figure>
+
+        <figure class="rv">
+          <div class="shot tall">
+            <div class="chrome"><i></i><i></i><i></i><span>Ideas</span></div>
+            <div class="view" tabindex="0"><img src="../assets/case-studies/trip-planner/ideas.webp" width="1200" height="1649" loading="lazy" alt="The Ideas tab listing unscheduled places with vote counts and remarks."></div>
+          </div>
+          <figcaption><b>Ideas.</b> Unscheduled suggestions, sorted by votes. The winners move into a day.</figcaption>
+        </figure>
+
+        <figure class="rv">
+          <div class="shot tall">
+            <div class="chrome"><i></i><i></i><i></i><span>Checklist</span></div>
+            <div class="view" tabindex="0"><img src="../assets/case-studies/trip-planner/checklist.webp" width="1200" height="1047" loading="lazy" alt="The Checklist tab with tasks, two ticked off, and the name of the person who claimed each one."></div>
+          </div>
+          <figcaption><b>Checklist.</b> What to book, buy or pack, and who said they would do it.</figcaption>
+        </figure>
+
+        <figure class="wide rv">
+          <div class="shot tall">
+            <div class="chrome"><i></i><i></i><i></i><span>Costs · scroll inside the frame</span></div>
+            <div class="view" tabindex="0"><img src="../assets/case-studies/trip-planner/costs.webp" width="1600" height="2131" loading="lazy" alt="The Costs tab with planned total, per-person share, cost per day and category, logged expenses and who owes whom."></div>
+          </div>
+          <figcaption><b>Costs.</b> Planned total and per-person share, then what each person actually paid and the fewest payments to settle up.</figcaption>
+        </figure>
+
+        <figure class="wide rv">
+          <div class="themes">
+            <div class="shot"><img src="../assets/case-studies/trip-planner/theme-japan.webp" width="1000" height="591" loading="lazy" alt="The itinerary in the Japan theme, pink with a red sun."></div>
+            <div class="shot"><img src="../assets/case-studies/trip-planner/theme-seaside.webp" width="1000" height="591" loading="lazy" alt="The itinerary in the Seaside theme, pale blue with a yellow sun."></div>
+            <div class="shot"><img src="../assets/case-studies/trip-planner/theme-tropical.webp" width="1000" height="591" loading="lazy" alt="The itinerary in the Tropical theme, pale green with an orange sun."></div>
+          </div>
+          <figcaption><b>Themes.</b> Japan, Seaside and Tropical. The creator picks one in Trip details and everyone's board changes with it.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RESULT ===================== -->
+<section class="sec" id="result">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="h2"><span class="letter">R</span>Result</h2>
+      <span class="rule"></span><span class="idx">// 04</span>
+    </div>
+    <ul class="results rv">
+      <li><b>3 real customers</b><span>used the planning module that Siiru's developer built from the prototype, in my final month there. That is the count I know of before I left.</span></li>
+      <li><b>1 day to a working v1</b><span>From a manual process to a prototype the team could click through, built with Claude Code and no engineering time.</span></li>
+      <li><b>Private by default</b><span>The rebuild opens only for people who hold both the link and the trip code.</span></li>
+    </ul>
+
+    <div class="learn">
+      <div class="rv">
+        <h3 class="h3">What I learned</h3>
+        <ul>
+          <li>A working prototype settles a discussion faster than a requirements document.</li>
+          <li>AI is quick at writing code. Deciding what the code should do is still the job.</li>
+          <li>Testing on a real plan finds problems that a demo never shows.</li>
+          <li>Privacy is easier to design in at the start than to add later.</li>
+        </ul>
+      </div>
+      <div class="rv">
+        <h3 class="h3">What it does not do</h3>
+        <ul>
+          <li>Names are typed, not verified. Anyone with the link and code can edit the trip.</li>
+          <li>It is not a place for passport numbers or booking references.</li>
+          <li>Cost splits are equal shares only.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CLOSING ===================== -->
+<section class="cta">
+  <div class="wrap">
+    <p class="eyebrow" style="color:var(--night-ink-3);margin-bottom:18px">Next</p>
+    <h2 class="display" style="font-size:clamp(1.8rem,4.6vw,3.4rem)">Have a manual process<br>that needs a prototype?</h2>
+    <p class="lead">I scope the problem, build something people can click, and hand it over ready for a team to take further.</p>
+    <div class="btns">
+      <a class="btn solid" href="../index.html#contact">Get in touch <span aria-hidden="true">→</span></a>
+      <a class="btn" href="../index.html#work">Back to selected work</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 Izanin Sofya Mohd Najib</span>
+    <span>Muadzam Shah · UTC+8</span>
+    <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">Back to top <span aria-hidden="true">↑</span></a>
+  </div>
+</footer>
+
+<script>
+document.body.classList.remove('no-js');
+(function(){
+  // Reveal anything at or above the bottom of the viewport, so nothing stays hidden if a scroll jumps past it.
+  var els = [].slice.call(document.querySelectorAll('.rv')), queued = false;
+  function check(){
+    queued = false;
+    var limit = window.innerHeight * 0.94;
+    els = els.filter(function(e){ if(e.getBoundingClientRect().top < limit){ e.classList.add('in'); return false; } return true; });
+    if(!els.length){ removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll); }
+  }
+  function onScroll(){ if(!queued){ queued = true; requestAnimationFrame(check); } }
+  addEventListener('scroll', onScroll, { passive:true }); addEventListener('resize', onScroll);
+  addEventListener('load', check); check();
+})();
+</script>
+</body>
+</html>
