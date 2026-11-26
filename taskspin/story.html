@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why a wheel? · TaskSpin</title>
+<meta name="description" content="The prioritisation thinking behind TaskSpin, a spin-the-wheel to-do list by Sofya.">
+<meta name="theme-color" content="#111110">
+<script>
+  // Same as the app: the visitor's saved theme, otherwise their device setting, set before drawing.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('taskspin_theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="preload" href="fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="theme.css">
+<style>
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans', sans-serif;
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:44px 20px 64px;
+  }
+
+  /* ── HEADER ── */
+  header { text-align:center; margin-bottom:40px; max-width:620px; }
+  .logo {
+    display:inline-flex; align-items:center; gap:8px;
+    color:var(--text-mid); text-decoration:none;
+    font-size:0.8rem; font-weight:500; margin-bottom:22px;
+  }
+  .logo svg { width:20px; height:20px; color:var(--pop); }
+  .logo:hover, .logo:focus-visible { color:var(--pop-text); }
+  h1 {
+    font-size:clamp(1.7rem, 5vw, 2.3rem); font-weight:600;
+    letter-spacing:-0.6px; line-height:1.15; margin-bottom:12px;
+  }
+  .subtitle {
+    font-size:0.72rem; color:var(--text-muted);
+    letter-spacing:0.1em; text-transform:uppercase;
+  }
+
+  /* ── CHAPTERS ── */
+  main { width:100%; max-width:620px; display:flex; flex-direction:column; gap:14px; }
+  .chapter {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:26px 26px 24px;
+  }
+  .chapter .chapter-label {
+    font-family:'DM Mono', monospace; font-size:0.66rem; line-height:1.4;
+    letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--pop-text); margin-bottom:10px;
+  }
+  .chapter h2 {
+    font-size:1.12rem; font-weight:600; letter-spacing:-0.2px;
+    color:var(--text); margin-bottom:12px;
+  }
+  .chapter p, .chapter li {
+    font-size:0.92rem; line-height:1.75; color:var(--text-soft);
+  }
+  .chapter p + p, .chapter p + ul, .chapter ul + p,
+  .chapter p + blockquote, .chapter blockquote + p { margin-top:12px; }
+  .chapter ul { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .chapter li { position:relative; padding-left:18px; }
+  .chapter li::before {
+    content:''; position:absolute; left:2px; top:0.72em;
+    width:6px; height:6px; border-radius:50%; background:var(--pop);
+  }
+  blockquote {
+    border-left:2px solid var(--pop); padding:2px 0 2px 16px;
+    font-size:0.92rem; line-height:1.75; color:var(--text-mid); font-style:italic;
+  }
+  blockquote strong { color:var(--text-soft); font-weight:500; font-style:normal; }
+
+  /* Placeholder for Sofya's own words. Must all be replaced before this page is published. */
+  .todo {
+    border:1px dashed var(--pop); border-radius:8px;
+    padding:12px 14px; margin-top:12px;
+    font-size:0.84rem; line-height:1.6; color:var(--text-soft);
+  }
+  .todo b {
+    display:block; font-family:'DM Mono', monospace; font-weight:500;
+    font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--pop-text); margin-bottom:4px;
+  }
+
+  /* ── CALL TO ACTION ── */
+  .cta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin-top:26px; }
+  .btn-try {
+    background:var(--pop); color:var(--on-pop); text-decoration:none;
+    border-radius:8px; padding:12px 20px;
+    font-family:'DM Mono', monospace; font-size:0.8rem; font-weight:500; letter-spacing:0.08em;
+    transition:opacity 0.15s;
+  }
+  .btn-try:hover { opacity:0.88; }
+  .btn-try:focus-visible, .btn-more:focus-visible { outline:2px solid var(--pop); outline-offset:2px; }
+  .btn-more {
+    color:var(--text-mid); text-decoration:none; font-size:0.84rem;
+    border:1px solid var(--border); border-radius:8px; padding:11px 18px;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .btn-more:hover { border-color:var(--pop); color:var(--pop-text); }
+
+  .signature {
+    margin-top:52px; font-size:0.7rem; color:var(--text-muted);
+    font-style:italic; letter-spacing:0.03em; text-align:center;
+  }
+  .signature .h { color:var(--pop-text); font-style:normal; }
+  .signature a {
+    color:var(--text-mid); text-decoration:none; border-bottom:1px solid var(--border);
+    transition:color 0.15s, border-color 0.15s;
+  }
+  .signature a:hover, .signature a:focus-visible { color:var(--pop-text); border-color:var(--pop); }
+
+  @media (max-width:600px) {
+    body { padding:72px 16px 56px; }
+    header { margin-bottom:28px; }
+    .chapter { padding:22px 20px 20px; }
+    .chapter p, .chapter li, blockquote { font-size:0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="corner-btn corner-left" href="./" aria-label="Back to TaskSpin" title="Back to TaskSpin">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M19 12H5M11 6l-6 6 6 6"/>
+  </svg>
+</a>
+
+<button class="corner-btn corner-right" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2"/>
+    <path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20.4 14.6A8.4 8.4 0 0 1 9.4 3.6a8.4 8.4 0 1 0 11 11z"/>
+  </svg>
+</button>
+
+<header>
+  <a class="logo" href="./">
+    <svg viewBox="0 0 26 26" fill="none" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="13" cy="13" r="7" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="13" cy="13" r="3" fill="currentColor"/>
+    </svg>
+    TaskSpin
+  </a>
+  <h1>Why a wheel?</h1>
+  <p class="subtitle">the prioritisation thinking behind it</p>
+</header>
+
+<main>
+
+  <section class="chapter">
+    <p class="chapter-label">01 · The morning problem</p>
+    <h2>A list too long, and a brain not quite ready</h2>
+    <p>
+      Every PM morning starts the same way: a list too long, a brain not quite ready, and the
+      quiet question of where to start.
+    </p>
+    <div class="todo" data-todo><b>Your notes needed</b>What a typical PM morning looked like for you, anonymised: the competing asks, and what deciding where to start actually cost.</div>
+  </section>
+
+  <section class="chapter">
+    <p class="chapter-label">02 · Prioritise first, spin second</p>
+    <h2>The wheel only gets what survived my judgement</h2>
+    <p>
+      A wheel is a terrible way to set priorities, and that's the point. Before anything goes on
+      TaskSpin, it has already been through the real work: what's urgent, what matters, what can
+      wait, and what can be dropped. The wheel only gets the tasks that are left and roughly
+      equal, where the hard part isn't choosing but starting.
+    </p>
+    <div class="todo" data-todo><b>Your notes needed</b>The prioritisation methods you actually use (for example the Eisenhower matrix, MoSCoW or RICE), and one moment where getting the priority right or wrong mattered. No company names or internal details.</div>
+  </section>
+
+  <section class="chapter">
+    <p class="chapter-label">03 · The honest nudge</p>
+    <h2>If you ignore the result, the wheel still did its job</h2>
+    <p>The first time you open TaskSpin, it asks:</p>
+    <blockquote>
+      Are you going to use this to decide tasks — or are you going to spin it, ignore the result,
+      and secretly do the one you wanted anyway? Because if that's the case,
+      <strong>maybe the real issue is a prioritisation system, not a randomiser.</strong>
+    </blockquote>
+    <p>
+      Spinning and then reaching for a different task isn't failure. Your reaction just told you
+      what your real priority was.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <p class="chapter-label">04 · Small on purpose</p>
+    <h2>Scope is a product decision too</h2>
+    <ul>
+      <li>One page. No sign-up, no account, nothing to install.</li>
+      <li>No tracking. Your tasks stay in your browser and are never sent anywhere.</li>
+      <li>"Done" takes a task off the wheel, and a little confetti marks the small win.</li>
+      <li>Light and dark modes that follow your device.</li>
+    </ul>
+  </section>
+
+  <section class="chapter">
+    <p class="chapter-label">05 · After launch</p>
+    <h2>Shipping is where looking after it starts</h2>
+    <ul>
+      <li>Moved it to its own home on my portfolio when its old address stopped working.</li>
+      <li>Fixed a bug where the wheel could announce a different task from the one under the pointer.</li>
+      <li>Made every piece of text meet the WCAG AA contrast minimum, in both modes.</li>
+      <li>Kept it working when a browser blocks storage, and made the note say honestly that tasks won't be saved.</li>
+    </ul>
+  </section>
+
+  <section class="chapter">
+    <p class="chapter-label">06 · What it doesn't do</p>
+    <h2>Deliberate gaps</h2>
+    <ul>
+      <li>It doesn't rank your tasks or know your deadlines. That judgement stays with you.</li>
+      <li>It doesn't sync between devices.</li>
+      <li>It doesn't collect usage data, so I have no numbers on how it's used. That's a trade-off I chose.</li>
+    </ul>
+  </section>
+
+  <section class="chapter">
+    <p class="chapter-label">07 · What I learned</p>
+    <h2>What building it taught me</h2>
+    <div class="todo" data-todo><b>Your notes needed</b>What building TaskSpin taught you, as a PM and as a builder.</div>
+  </section>
+
+  <div class="cta">
+    <a class="btn-try" href="./">TRY TASKSPIN →</a>
+    <a class="btn-more" href="https://izaninsofya.github.io/">More about Sofya</a>
+  </div>
+
+</main>
+
+<p class="signature">made with <span class="h">♥</span> by <a href="https://izaninsofya.github.io/">Sofya</a></p>
+
+<script>
+/* ── Theme (same choice as the app) ── */
+const THEME_KEY = 'taskspin_theme';
+const themeBtn  = document.getElementById('themeToggle');
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const next = t === 'light' ? 'dark' : 'light';
+  themeBtn.setAttribute('aria-label', `Switch to ${next} mode`);
+  themeBtn.title = `Switch to ${next} mode`;
+  themeMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
+}
+function savedTheme() { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } }
+themeBtn.addEventListener('click', () => {
+  const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  setTheme(t);
+});
+// Follow the device until the visitor picks a theme, and keep in step with other TaskSpin tabs.
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+  const s = savedTheme();
+  if (s !== 'light' && s !== 'dark') setTheme(e.matches ? 'light' : 'dark');
+});
+window.addEventListener('storage', e => {
+  if (e.key === THEME_KEY && (e.newValue === 'light' || e.newValue === 'dark')) setTheme(e.newValue);
+});
+setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+</script>
+</body>
+</html>

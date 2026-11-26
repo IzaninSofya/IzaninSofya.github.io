@@ -1,0 +1,83 @@
+/* TaskSpin theme, shared by the app (index.html) and the story page (story.html). */
+/* Colours are named by role, so a theme only has to swap values.
+   Every text colour reaches at least 4.5:1 contrast on the surfaces it sits on. */
+:root {
+  color-scheme: dark;
+  --bg:          #111110;
+  --surface:     #1c1c1b;
+  --card:        #222221;
+  --border:      #2e2e2c;
+  --text-muted:  #8c8c87;
+  --text-mid:    #9a9a96;
+  --text-soft:   #d4d4cf;
+  --text:        #f0f0eb;
+  --pop:         #e8633a;   /* orange fills, borders, pointer */
+  --pop-text:    #e8633a;   /* orange used for text */
+  --pop-dim:     rgba(232,99,58,0.10);
+  --on-pop:      #111110;   /* text on orange buttons */
+  --overlay:      rgba(0,0,0,0.75);
+  --modal-shadow: rgba(0,0,0,0.65);
+  --wheel-shadow: rgba(0,0,0,0.55);
+  --pointer-glow: rgba(232,99,58,0.45);
+  /* read by the script each time the wheel and confetti are drawn */
+  --wheel-slices:       #272725 #323230 #2a2a28 #363634 #242423 #2e2e2c #303030 #282826;
+  --wheel-accent:       #261a16;
+  --wheel-stroke:       #111110;
+  --wheel-label:        #a1a19c;
+  --wheel-label-accent: #d4886a;
+  --dot:                #3a3a38;
+  --confetti:           #3d3d3a #6b6b68 #9a9a96 #d4d4cf #e8633a #e8633a #f0f0eb;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:          #f6f5f1;
+  --surface:     #efeee9;
+  --card:        #ffffff;
+  --border:      #dddcd5;
+  --text-muted:  #696964;
+  --text-mid:    #55554f;
+  --text-soft:   #33332f;
+  --text:        #1a1a18;
+  --pop:         #e8633a;
+  --pop-text:    #a83f1b;   /* darker orange, so orange text stays readable on light surfaces */
+  --pop-dim:     rgba(232,99,58,0.12);
+  --on-pop:      #111110;
+  --overlay:      rgba(26,26,24,0.40);
+  --modal-shadow: rgba(0,0,0,0.18);
+  --wheel-shadow: rgba(0,0,0,0.10);
+  --pointer-glow: rgba(232,99,58,0.30);
+  --wheel-slices:       #ecebe6 #e3e2dc #e8e7e1 #dedcd5 #efeee9 #e5e4de #e1e0da #eae9e3;
+  --wheel-accent:       #f9e1d6;
+  --wheel-stroke:       #ffffff;
+  --wheel-label:        #5e5e59;
+  --wheel-label-accent: #a83f1b;
+  --dot:                #c8c6bf;
+  --confetti:           #c8c6bf #9a9a94 #6c6c67 #33332f #e8633a #e8633a #a83f1b;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* Round buttons pinned to the top corners: theme toggle, lightbulb, back link. */
+.corner-btn {
+  position:absolute; top:16px;
+  width:40px; height:40px; border-radius:50%;
+  background:var(--card); border:1px solid var(--border);
+  color:var(--text-mid); cursor:pointer; text-decoration:none;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color 0.15s, color 0.15s, box-shadow 0.2s;
+}
+.corner-left  { left:16px; }
+.corner-right { right:16px; }
+.corner-btn:hover { border-color:var(--pop); color:var(--pop-text); }
+.corner-btn:focus-visible { outline:2px solid var(--pop); outline-offset:2px; }
+.corner-btn svg { width:18px; height:18px; }
+/* the theme icon shows the mode you would switch to */
+:root:not([data-theme="light"]) .icon-moon,
+:root[data-theme="light"] .icon-sun { display:none; }
+
+@media (max-width:600px) {
+  .corner-btn   { top:12px; width:44px; height:44px; }
+  .corner-left  { left:12px; }
+  .corner-right { right:12px; }
+}
