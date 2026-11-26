@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why a wheel? · TaskSpin</title>
+<meta name="description" content="The prioritisation thinking behind TaskSpin, a spin-the-wheel to-do list by Sofya.">
+<meta name="theme-color" content="#111110">
+<script>
+  // Same as the app: the visitor's saved theme, otherwise their device setting, set before drawing.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('taskspin_theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="preload" href="fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="theme.css">
+<style>
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans', sans-serif;
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:44px 20px 64px;
+  }
+
+  /* ── HEADER ── */
+  header { text-align:center; margin-bottom:40px; max-width:620px; }
+  .logo {
+    display:inline-flex; align-items:center; gap:8px;
+    color:var(--text-mid); text-decoration:none;
+    font-size:0.8rem; font-weight:500; margin-bottom:22px;
+  }
+  .logo svg { width:20px; height:20px; color:var(--pop); }
+  .logo:hover, .logo:focus-visible { color:var(--pop-text); }
+  h1 {
+    font-size:clamp(1.7rem, 5vw, 2.3rem); font-weight:600;
+    letter-spacing:-0.6px; line-height:1.15; margin-bottom:12px;
+  }
+  .subtitle {
+    font-size:0.72rem; color:var(--text-muted);
+    letter-spacing:0.1em; text-transform:uppercase;
+  }
+
+  /* ── STORY CAROUSEL: one part at a time, side by side ── */
+  main { width:100%; max-width:620px; }
+  .track {
+    position:relative; display:flex; gap:14px; align-items:flex-start;
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    overscroll-behavior-x:contain; scrollbar-width:none;
+    transition:height 0.35s ease;   /* the track follows the height of the part in view */
+  }
+  .track::-webkit-scrollbar { display:none; }
+  .chapter {
+    flex:0 0 100%; scroll-snap-align:start; scroll-snap-stop:always;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:26px 26px 24px;
+  }
+
+  .pager { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:18px; }
+  .pager[hidden], .story-hint[hidden] { display:none; }
+  .pager-arrow {
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    background:var(--card); border:1px solid var(--border); color:var(--text-mid);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:border-color 0.15s, color 0.15s, opacity 0.15s;
+  }
+  .pager-arrow svg { width:18px; height:18px; }
+  .pager-arrow:hover:not(:disabled) { border-color:var(--pop); color:var(--pop-text); }
+  .pager-arrow:disabled { opacity:0.35; cursor:default; }
+  .pager-arrow:focus-visible, .dot:focus-visible { outline:2px solid var(--pop); outline-offset:2px; }
+  .dots { display:flex; align-items:center; }
+  .dot {
+    width:24px; height:24px; border:none; background:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; border-radius:12px;
+  }
+  .dot::before {
+    content:''; width:7px; height:7px; border-radius:4px;
+    background:var(--text-muted); opacity:0.55;
+    transition:width 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+  }
+  .dot:hover::before { opacity:1; }
+  .dot[aria-current="true"]::before { width:18px; background:var(--pop); opacity:1; }
+  .count {
+    font-family:'DM Mono', monospace; font-size:0.7rem; color:var(--text-muted);
+    min-width:3.4em; text-align:center;
+  }
+  .story-hint {
+    text-align:center; font-size:0.7rem; color:var(--text-muted);
+    margin-top:10px; transition:opacity 0.4s ease;
+  }
+  .story-hint.gone { opacity:0; }
+  .hint-touch { display:none; }
+  @media (hover:none) and (pointer:coarse) { .hint-touch { display:inline; } .hint-mouse { display:none; } }
+  .sr-only {
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap; margin:-1px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track { scroll-behavior:auto; transition:none; }
+    .dot::before, .story-hint { transition:none; }
+  }
+  .chapter .chapter-label {
+    font-family:'DM Mono', monospace; font-size:0.66rem; line-height:1.4;
+    letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--pop-text); margin-bottom:10px;
+  }
+  .chapter h2 {
+    font-size:1.12rem; font-weight:600; letter-spacing:-0.2px;
+    color:var(--text); margin-bottom:12px;
+  }
+  .chapter p, .chapter li {
+    font-size:0.92rem; line-height:1.75; color:var(--text-soft);
+  }
+  .chapter p + p, .chapter p + ul, .chapter ul + p,
+  .chapter p + blockquote, .chapter blockquote + p { margin-top:12px; }
+  .chapter ul { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .chapter li { position:relative; padding-left:18px; }
+  .chapter li::before {
+    content:''; position:absolute; left:2px; top:0.72em;
+    width:6px; height:6px; border-radius:50%; background:var(--pop);
+  }
+  blockquote {
+    border-left:2px solid var(--pop); padding:2px 0 2px 16px;
+    font-size:0.92rem; line-height:1.75; color:var(--text-mid); font-style:italic;
+  }
+  blockquote strong { color:var(--text-soft); font-weight:500; font-style:normal; }
+
+
+  /* ── CALL TO ACTION ── */
+  .cta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin-top:26px; }
+  .btn-try {
+    background:var(--pop); color:var(--on-pop); text-decoration:none;
+    border-radius:8px; padding:12px 20px;
+    font-family:'DM Mono', monospace; font-size:0.8rem; font-weight:500; letter-spacing:0.08em;
+    transition:opacity 0.15s;
+  }
+  .btn-try:hover { opacity:0.88; }
+  .btn-try:focus-visible, .btn-more:focus-visible { outline:2px solid var(--pop); outline-offset:2px; }
+  .btn-more {
+    color:var(--text-mid); text-decoration:none; font-size:0.84rem;
+    border:1px solid var(--border); border-radius:8px; padding:11px 18px;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .btn-more:hover { border-color:var(--pop); color:var(--pop-text); }
+
+  .signature {
+    margin-top:52px; font-size:0.7rem; color:var(--text-muted);
+    font-style:italic; letter-spacing:0.03em; text-align:center;
+  }
+  .signature .h { color:var(--pop-text); font-style:normal; }
+  .signature a {
+    color:var(--text-mid); text-decoration:none; border-bottom:1px solid var(--border);
+    transition:color 0.15s, border-color 0.15s;
+  }
+  .signature a:hover, .signature a:focus-visible { color:var(--pop-text); border-color:var(--pop); }
+
+  @media (max-width:600px) {
+    body { padding:72px 16px 56px; }
+    header { margin-bottom:28px; }
+    .chapter { padding:22px 20px 20px; flex-basis:calc(100% - 30px); }   /* the next part peeks in */
+    /* run the parts to the screen edges, so the next one peeks in cleanly */
+    .track { gap:10px; margin:0 -16px; padding:0 16px; scroll-padding:0 16px; }
+    .chapter p, .chapter li, blockquote { font-size:0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="corner-btn corner-left" href="./" aria-label="Back to TaskSpin" title="Back to TaskSpin">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M19 12H5M11 6l-6 6 6 6"/>
+  </svg>
+</a>
+
+<button class="corner-btn corner-right" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2"/>
+    <path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20.4 14.6A8.4 8.4 0 0 1 9.4 3.6a8.4 8.4 0 1 0 11 11z"/>
+  </svg>
+</button>
+
+<header>
+  <a class="logo" href="./">
+    <svg viewBox="0 0 26 26" fill="none" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="13" cy="13" r="7" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="13" cy="13" r="3" fill="currentColor"/>
+    </svg>
+    TaskSpin
+  </a>
+  <h1>Why a wheel?</h1>
+  <p class="subtitle">the prioritisation thinking behind it</p>
+</header>
+
+<main>
+
+  <div class="carousel" role="region" aria-roledescription="carousel" aria-label="Why a wheel, in 8 parts">
+  <div class="track" id="track">
+
+  <section class="chapter" id="part-1" role="group" aria-roledescription="slide">
+    <p class="chapter-label">01 · The morning problem</p>
+    <h2>A list too long, and a brain not quite ready</h2>
+    <p>
+      Every PM morning starts the same way: a list too long, a brain not quite ready, and the
+      quiet question of where to start.
+    </p>
+    <ul>
+      <li>Customer support flags unhappy users after the latest update rolled out.</li>
+      <li>A stakeholder asks for a new feature, because a competitor has just launched it.</li>
+      <li>The ops team needs an internal system built, while the developers are already stretched.</li>
+    </ul>
+    <p>Each one is urgent to someone. They can't all come first.</p>
+  </section>
+
+  <section class="chapter" id="part-2" role="group" aria-roledescription="slide">
+    <p class="chapter-label">02 · Prioritise first, spin second</p>
+    <h2>The wheel only gets what survived my judgement</h2>
+    <p>A wheel is a terrible way to set priorities, and that's the point.</p>
+    <p>
+      I don't follow a named framework. I weigh the impact of each item, take it to my direct
+      manager for their insight and the decision, and make the trade-offs clear, so everyone
+      knows what waits and why.
+    </p>
+    <p>
+      Only what's left after that, the tasks that are roughly equal, goes on the wheel. By then
+      the hard part isn't choosing. It's starting.
+    </p>
+  </section>
+
+  <section class="chapter" id="part-3" role="group" aria-roledescription="slide">
+    <p class="chapter-label">03 · The honest nudge</p>
+    <h2>If you ignore the result, the wheel still did its job</h2>
+    <p>The first time you open TaskSpin, it asks:</p>
+    <blockquote>
+      Are you going to use this to decide tasks — or are you going to spin it, ignore the result,
+      and secretly do the one you wanted anyway? Because if that's the case,
+      <strong>maybe the real issue is a prioritisation system, not a randomiser.</strong>
+    </blockquote>
+    <p>
+      Spinning and then reaching for a different task isn't failure. Your reaction just told you
+      what your real priority was.
+    </p>
+  </section>
+
+  <section class="chapter" id="part-4" role="group" aria-roledescription="slide">
+    <p class="chapter-label">04 · Small on purpose</p>
+    <h2>Scope is a product decision too</h2>
+    <ul>
+      <li>One page. No sign-up, no account, nothing to install.</li>
+      <li>No tracking. Your tasks stay in your browser and are never sent anywhere.</li>
+      <li>"Done" takes a task off the wheel, and a little confetti marks the small win.</li>
+      <li>Light and dark modes that follow your device.</li>
+    </ul>
+  </section>
+
+  <section class="chapter" id="part-5" role="group" aria-roledescription="slide">
+    <p class="chapter-label">05 · After launch</p>
+    <h2>Shipping is where looking after it starts</h2>
+    <ul>
+      <li>Moved it to its own home on my portfolio when its old address stopped working.</li>
+      <li>Fixed a bug where the wheel could announce a different task from the one under the pointer.</li>
+      <li>Made every piece of text meet the WCAG AA contrast minimum, in both modes.</li>
+      <li>Kept it working when a browser blocks storage, and made the note say honestly that tasks won't be saved.</li>
+    </ul>
+  </section>
+
+  <section class="chapter" id="part-6" role="group" aria-roledescription="slide">
+    <p class="chapter-label">06 · What it doesn't do</p>
+    <h2>Deliberate gaps</h2>
+    <ul>
+      <li>It doesn't rank your tasks or know your deadlines. That judgement stays with you.</li>
+      <li>It doesn't sync between devices.</li>
+      <li>It doesn't collect usage data, so I have no numbers on how it's used. That's a trade-off I chose.</li>
+    </ul>
+  </section>
+
+  <section class="chapter" id="part-7" role="group" aria-roledescription="slide">
+    <p class="chapter-label">07 · What I learned</p>
+    <h2>Accountable doesn't mean alone</h2>
+    <p>
+      The longer I work in product, the more I realise I don't need an answer to everything. That
+      wasn't easy to accept. I was used to investigating, experimenting and solving problems myself.
+    </p>
+    <p>
+      But clients want answers now, teams wait on decisions, and I'm often caught between what's
+      technically possible, what the business expects and what's already been promised. So I've
+      learned to say "I need to discuss this with the team before committing", or simply "I don't
+      have the answer yet". A quick answer isn't always the right one. I still feel the pressure,
+      and I don't always get the balance right, but being accountable for a decision doesn't mean
+      making it alone.
+    </p>
+    <p>
+      Operations taught me the other half: understand the problem before designing the solution.
+      What are people actually struggling with? Is it a process issue, a technology gap, or both?
+      What happens when the solution meets real-world exceptions?
+    </p>
+    <blockquote>
+      Great products aren't designed only around what technology can do. They're designed around
+      what people actually need to accomplish.
+    </blockquote>
+  </section>
+
+  <section class="chapter" id="part-8" role="group" aria-roledescription="slide">
+    <p class="chapter-label">08 · Over to you</p>
+    <h2>Free to spin</h2>
+    <p>TaskSpin is free for everyone to use. No sign-up, no fee.</p>
+    <p>
+      Work list, home list, or the one that lives rent-free in your head: things need to get
+      started and sorted either way. Triage first, spin second, and let the wheel break the tie.
+    </p>
+    <p>
+      And if you ignore the result, nobody's watching. Literally: TaskSpin doesn't track a thing.
+    </p>
+  </section>
+
+  </div>
+  </div>
+
+  <nav class="pager" id="pager" aria-label="Story parts" hidden>
+    <button class="pager-arrow" id="prevBtn" type="button" aria-label="Previous part">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="dots" id="dots"></div>
+    <span class="count" id="count" aria-hidden="true"></span>
+    <button class="pager-arrow" id="nextBtn" type="button" aria-label="Next part">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </nav>
+  <p class="story-hint" id="hint" hidden>
+    <span class="hint-mouse">Use the arrows, the dots or your ← → keys to read on</span>
+    <span class="hint-touch">Swipe sideways to read on</span>
+  </p>
+  <p class="sr-only" id="live" aria-live="polite"></p>
+
+  <div class="cta">
+    <a class="btn-try" href="./">TRY TASKSPIN →</a>
+    <a class="btn-more" href="https://izaninsofya.github.io/">More about Sofya</a>
+  </div>
+
+</main>
+
+<p class="signature">made with <span class="h">♥</span> by <a href="https://izaninsofya.github.io/">Sofya</a></p>
+
+<script>
+/* ── Theme (same choice as the app) ── */
+const THEME_KEY = 'taskspin_theme';
+const themeBtn  = document.getElementById('themeToggle');
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const next = t === 'light' ? 'dark' : 'light';
+  themeBtn.setAttribute('aria-label', `Switch to ${next} mode`);
+  themeBtn.title = `Switch to ${next} mode`;
+  themeMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
+}
+function savedTheme() { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } }
+themeBtn.addEventListener('click', () => {
+  const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  setTheme(t);
+});
+// Follow the device until the visitor picks a theme, and keep in step with other TaskSpin tabs.
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+  const s = savedTheme();
+  if (s !== 'light' && s !== 'dark') setTheme(e.matches ? 'light' : 'dark');
+});
+window.addEventListener('storage', e => {
+  if (e.key === THEME_KEY && (e.newValue === 'light' || e.newValue === 'dark')) setTheme(e.newValue);
+});
+setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+
+/* ── Story carousel ──
+   Native horizontal scrolling with snap points does the swiping; this adds the dots,
+   arrows, keys, a link per part (#part-3), and keeps the height to the part in view. */
+const track   = document.getElementById('track');
+const slides  = [...track.querySelectorAll('.chapter')];
+const dotsEl  = document.getElementById('dots');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const countEl = document.getElementById('count');
+const liveEl  = document.getElementById('live');
+const hintEl  = document.getElementById('hint');
+const calm    = window.matchMedia('(prefers-reduced-motion: reduce)');
+const titles  = slides.map(sl => sl.querySelector('.chapter-label').textContent.replace(/^\s*\d+\s*·\s*/, '').trim());
+let current = -1;
+let target  = null;   // part an arrow, dot or key is heading to, while the slide is still moving
+
+slides.forEach((sl, i) => {
+  sl.setAttribute('aria-label', `${i + 1} of ${slides.length}: ${titles[i]}`);
+  const d = document.createElement('button');
+  d.type = 'button'; d.className = 'dot';
+  d.setAttribute('aria-label', `Go to part ${i + 1}: ${titles[i]}`);
+  d.addEventListener('click', () => go(i));
+  dotsEl.appendChild(d);
+});
+const dots = [...dotsEl.children];
+
+// Where part i sits in the row, allowing for the row's side padding on phones.
+const at = i => slides[i].offsetLeft - (parseFloat(getComputedStyle(track).paddingLeft) || 0);
+function go(i, instant) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  target = i;
+  if (instant || calm.matches) {
+    // jump without sliding: switch the CSS smooth scrolling off for this one move
+    track.style.scrollBehavior = 'auto';
+    track.scrollLeft = at(i);
+    track.style.scrollBehavior = '';
+  } else {
+    track.scrollTo({ left: at(i), behavior: 'smooth' });
+  }
+}
+// Quick repeated presses add up: count from where we're heading, not from where the slide is now.
+const from = () => (target === null ? current : target);
+function fitHeight() { if (current >= 0) track.style.height = slides[current].offsetHeight + 'px'; }
+function setActive(i) {
+  if (i === target) target = null;   // arrived
+  if (i === current) return;
+  const first = current === -1;
+  current = i;
+  dots.forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
+  prevBtn.disabled = i === 0;
+  nextBtn.disabled = i === slides.length - 1;
+  countEl.textContent = `${i + 1} / ${slides.length}`;
+  fitHeight();
+  if (!first) {
+    liveEl.textContent = `Part ${i + 1} of ${slides.length}: ${titles[i]}`;
+    hintEl.classList.add('gone');
+    history.replaceState(null, '', '#part-' + (i + 1));
+  }
+}
+function nearest() {
+  const x = track.scrollLeft;
+  let best = 0, dist = Infinity;
+  slides.forEach((sl, k) => { const d = Math.abs(at(k) - x); if (d < dist) { dist = d; best = k; } });
+  return best;
+}
+
+let ticking = false;
+track.addEventListener('scroll', () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => { ticking = false; setActive(nearest()); });
+}, { passive: true });
+// A finger, trackpad or wheel on the parts means the reader is steering by hand.
+['pointerdown', 'touchstart', 'wheel'].forEach(ev => track.addEventListener(ev, () => { target = null; }, { passive: true }));
+prevBtn.addEventListener('click', () => go(from() - 1));
+nextBtn.addEventListener('click', () => go(from() + 1));
+document.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(from() + 1); }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); go(from() - 1); }
+});
+window.addEventListener('resize', () => { go(current, true); fitHeight(); });
+
+// open at the part named in the link, if any (…/story.html#part-5)
+const asked = /^#part-(\d+)$/.exec(location.hash);
+const start = asked ? Math.max(0, Math.min(slides.length - 1, +asked[1] - 1)) : 0;
+document.getElementById('pager').hidden = false;
+hintEl.hidden = false;
+setActive(start);
+go(start, true);
+if (document.fonts) document.fonts.ready.then(fitHeight);
+</script>
+</body>
+</html>
