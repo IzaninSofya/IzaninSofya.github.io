@@ -633,7 +633,26 @@ function readTheme() {
 }
 readTheme();
 
-let tasks = JSON.parse(localStorage.getItem('taskspin_v2') || '[]');
+/* ── Storage ── */
+// Strict privacy settings can block website storage, and then even touching it throws.
+// Every read and write goes through these, so TaskSpin keeps working; it just can't remember.
+function storageArea(kind) { try { return window[kind] || null; } catch (e) { return null; } }
+function readStored(kind, key) {
+  try { const s = storageArea(kind); return s ? s.getItem(key) : null; } catch (e) { return null; }
+}
+function writeStored(kind, key, value) {
+  try { const s = storageArea(kind); if (!s) return false; s.setItem(key, value); return true; } catch (e) { return false; }
+}
+function loadTasks() {
+  try {
+    const list = JSON.parse(readStored('localStorage', 'taskspin_v2') || '[]');
+    return Array.isArray(list) ? list.filter(t => t && typeof t.name === 'string') : [];
+  } catch (e) { return []; }   // unreadable saved data: start empty rather than break the page
+}
+const canSave = writeStored('localStorage', 'taskspin_probe', '1');
+if (canSave) { try { localStorage.removeItem('taskspin_probe'); } catch (e) {} }
+
+let tasks = loadTasks();
 let rotation = 0;
 let isSpinning = false;
 let pendingWin = -1;
@@ -641,7 +660,7 @@ let pendingWin = -1;
 const canvas = document.getElementById('wheel');
 const ctx    = canvas.getContext('2d');
 
-const save = () => localStorage.setItem('taskspin_v2', JSON.stringify(tasks));
+const save = () => writeStored('localStorage', 'taskspin_v2', JSON.stringify(tasks));
 const wc   = i => C.slices[i % C.slices.length];
 
 function drawWheel() {
@@ -812,15 +831,20 @@ function setTheme(t) {
 }
 themeBtn.addEventListener('click', () => {
   const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  writeStored('localStorage', THEME_KEY, t);
   setTheme(t);
 });
 // Until someone presses the toggle, keep following the device setting.
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
-  let saved = null;
-  try { saved = localStorage.getItem(THEME_KEY); } catch (err) {}
+  const saved = readStored('localStorage', THEME_KEY);
   if (saved !== 'light' && saved !== 'dark') setTheme(e.matches ? 'light' : 'dark');
 });
+
+// If storage is blocked, the usual note would be untrue: say what will actually happen.
+if (!canSave) {
+  document.querySelector('.storage-note').textContent =
+    "Your browser is blocking website storage, so these tasks can't be saved. They'll be gone when you reload or close this page.";
+}
 
 renderTasks();
 setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'); // also draws the wheel
@@ -828,9 +852,9 @@ setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'ligh
 // Welcome modal — show once per session
 function closeWelcome() {
   document.getElementById('welcomeOverlay').classList.remove('open');
-  sessionStorage.setItem('ts_welcomed','1');
+  writeStored('sessionStorage', 'ts_welcomed', '1');
 }
-if (!sessionStorage.getItem('ts_welcomed')) {
+if (!readStored('sessionStorage', 'ts_welcomed')) {
   setTimeout(()=>document.getElementById('welcomeOverlay').classList.add('open'), 400);
 }
 </script>
