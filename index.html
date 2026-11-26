@@ -809,18 +809,24 @@ a.keycap:hover{border-color:var(--accent);background:rgba(22,235,235,.09)}
 .now-note{margin-top:14px;font-size:12.5px;font-weight:300;color:var(--night-ink-3);line-height:1.7;max-width:30ch}
 /* a second keycap in the same column (Building) */
 .now-note + .keycap{margin-top:24px}
-/* short phones: the stacked column must still fit inside the pinned 100svh */
-/* raised from 760px when the third Shipped & building item was added */
+/* phones: tighter spacing for the stacked column. Every note stays visible at every height. */
 @media (max-width:820px) and (max-height:900px){
   .now-grid{gap:20px}
   .now-item .h3{margin:6px 0 12px}
   .now-item .keycap{padding:11px 18px}
   .now-note{margin-top:9px}
   .now-note + .keycap{margin-top:14px}
-  .now-extra{display:none}
 }
-/* very short phones: drop the notes so three keycaps still clear the header */
-@media (max-width:820px) and (max-height:700px){.now-note{display:none}.now-item .keycap + .keycap{margin-top:10px}}
+/* Phones too short to hold the whole Now column on one screen: let that section scroll
+   like any other instead of pinning it, so nothing has to be hidden. The scene stays
+   behind it; taller phones, tablets and desktop keep the pinned hold. */
+@media (max-width:820px) and (max-height:840px){
+  .pin-sec.now-sec{height:auto!important}
+  .pin-sec.now-sec .pin{
+    position:relative; height:auto; min-height:100svh;
+    padding-top:clamp(72px,11vh,104px); padding-bottom:56px;
+  }
+}
 
 /* pull quote */
 .quote{max-width:min(980px,100%)}
@@ -1362,7 +1368,7 @@ footer{
 </div>
 
 <!-- ===================== NOW (pinned over scene) ===================== -->
-<section class="pin-sec scene-sec" data-scene="night" style="height:190svh">
+<section class="pin-sec scene-sec now-sec" data-scene="night" style="height:190svh">
   <div class="pin">
     <div class="veil" aria-hidden="true"></div>
     <div class="wrap night-copy">
@@ -1378,10 +1384,10 @@ footer{
           <h2 class="h3">Shipped &amp; building</h2>
           <a class="keycap" href="taskspin/" target="_blank" rel="noopener noreferrer">TaskSpin, a spin-the-wheel to-do list ↗</a>
           <p class="now-note">Shipped and live. The first one, and the reason there's always a next one.</p>
-          <a class="keycap" href="https://linktr.ee/izaninsofya" target="_blank" rel="noopener noreferrer">Weekend quizzes for the family ↗</a>
-          <p class="now-note now-extra">Small revision quizzes for home use: Sejarah, Bahasa Arab, English, MUET.</p>
           <a class="keycap" href="case-studies/private-trip-planner.html">Private Trip Planner, a case study →</a>
           <p class="now-note now-extra">A group trip planner prototyped with AI, then rebuilt behind a trip code.</p>
+          <a class="keycap" href="https://linktr.ee/izaninsofya" target="_blank" rel="noopener noreferrer">Weekend quizzes for the family ↗</a>
+          <p class="now-note now-extra">Small revision quizzes for home use: Sejarah, Bahasa Arab, English, MUET.</p>
         </div>
         <div class="now-item rv" style="--d:260ms">
           <p class="eyebrow">Now // 03</p>
@@ -1430,7 +1436,7 @@ footer{
       </div>
       <ul class="facts rv" style="--d:200ms">
         <li><span class="k">Delivery</span><span class="v">Sprint planning · PRDs · Roadmaps</span></li>
-        <li><span class="k">Tools</span><span class="v">Notion · Slack · Google Workspace</span></li>
+        <li><span class="k">Tools</span><span class="v">Notion · Linear · Slack · Google Workspace</span></li>
         <li><span class="k">Languages</span><span class="v">English · Bahasa Malaysia · Indonesia</span></li>
         <li><span class="k">Based in</span><span class="v">Muadzam Shah, Pahang · Remote</span></li>
         <li><span class="k">Belief</span><span class="v">Sincerity, Excellence, Accountability</span></li>
