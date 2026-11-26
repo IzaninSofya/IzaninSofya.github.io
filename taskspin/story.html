@@ -45,11 +45,64 @@
     letter-spacing:0.1em; text-transform:uppercase;
   }
 
-  /* ── CHAPTERS ── */
-  main { width:100%; max-width:620px; display:flex; flex-direction:column; gap:14px; }
+  /* ── STORY CAROUSEL: one part at a time, side by side ── */
+  main { width:100%; max-width:620px; }
+  .track {
+    position:relative; display:flex; gap:14px; align-items:flex-start;
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    overscroll-behavior-x:contain; scrollbar-width:none;
+    transition:height 0.35s ease;   /* the track follows the height of the part in view */
+  }
+  .track::-webkit-scrollbar { display:none; }
   .chapter {
+    flex:0 0 100%; scroll-snap-align:start; scroll-snap-stop:always;
     background:var(--card); border:1px solid var(--border);
     border-radius:12px; padding:26px 26px 24px;
+  }
+
+  .pager { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:18px; }
+  .pager[hidden], .story-hint[hidden] { display:none; }
+  .pager-arrow {
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    background:var(--card); border:1px solid var(--border); color:var(--text-mid);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:border-color 0.15s, color 0.15s, opacity 0.15s;
+  }
+  .pager-arrow svg { width:18px; height:18px; }
+  .pager-arrow:hover:not(:disabled) { border-color:var(--pop); color:var(--pop-text); }
+  .pager-arrow:disabled { opacity:0.35; cursor:default; }
+  .pager-arrow:focus-visible, .dot:focus-visible { outline:2px solid var(--pop); outline-offset:2px; }
+  .dots { display:flex; align-items:center; }
+  .dot {
+    width:24px; height:24px; border:none; background:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; border-radius:12px;
+  }
+  .dot::before {
+    content:''; width:7px; height:7px; border-radius:4px;
+    background:var(--text-muted); opacity:0.55;
+    transition:width 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+  }
+  .dot:hover::before { opacity:1; }
+  .dot[aria-current="true"]::before { width:18px; background:var(--pop); opacity:1; }
+  .count {
+    font-family:'DM Mono', monospace; font-size:0.7rem; color:var(--text-muted);
+    min-width:3.4em; text-align:center;
+  }
+  .story-hint {
+    text-align:center; font-size:0.7rem; color:var(--text-muted);
+    margin-top:10px; transition:opacity 0.4s ease;
+  }
+  .story-hint.gone { opacity:0; }
+  .hint-touch { display:none; }
+  @media (hover:none) and (pointer:coarse) { .hint-touch { display:inline; } .hint-mouse { display:none; } }
+  .sr-only {
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap; margin:-1px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track { scroll-behavior:auto; transition:none; }
+    .dot::before, .story-hint { transition:none; }
   }
   .chapter .chapter-label {
     font-family:'DM Mono', monospace; font-size:0.66rem; line-height:1.4;
@@ -120,7 +173,9 @@
   @media (max-width:600px) {
     body { padding:72px 16px 56px; }
     header { margin-bottom:28px; }
-    .chapter { padding:22px 20px 20px; }
+    .chapter { padding:22px 20px 20px; flex-basis:calc(100% - 30px); }   /* the next part peeks in */
+    /* run the parts to the screen edges, so the next one peeks in cleanly */
+    .track { gap:10px; margin:0 -16px; padding:0 16px; scroll-padding:0 16px; }
     .chapter p, .chapter li, blockquote { font-size:0.9rem; }
   }
 </style>
@@ -158,7 +213,10 @@
 
 <main>
 
-  <section class="chapter">
+  <div class="carousel" role="region" aria-roledescription="carousel" aria-label="Why a wheel, in 7 parts">
+  <div class="track" id="track">
+
+  <section class="chapter" id="part-1" role="group" aria-roledescription="slide">
     <p class="chapter-label">01 · The morning problem</p>
     <h2>A list too long, and a brain not quite ready</h2>
     <p>
@@ -168,7 +226,7 @@
     <div class="todo" data-todo><b>Your notes needed</b>What a typical PM morning looked like for you, anonymised: the competing asks, and what deciding where to start actually cost.</div>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="part-2" role="group" aria-roledescription="slide">
     <p class="chapter-label">02 · Prioritise first, spin second</p>
     <h2>The wheel only gets what survived my judgement</h2>
     <p>
@@ -180,7 +238,7 @@
     <div class="todo" data-todo><b>Your notes needed</b>The prioritisation methods you actually use (for example the Eisenhower matrix, MoSCoW or RICE), and one moment where getting the priority right or wrong mattered. No company names or internal details.</div>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="part-3" role="group" aria-roledescription="slide">
     <p class="chapter-label">03 · The honest nudge</p>
     <h2>If you ignore the result, the wheel still did its job</h2>
     <p>The first time you open TaskSpin, it asks:</p>
@@ -195,7 +253,7 @@
     </p>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="part-4" role="group" aria-roledescription="slide">
     <p class="chapter-label">04 · Small on purpose</p>
     <h2>Scope is a product decision too</h2>
     <ul>
@@ -206,7 +264,7 @@
     </ul>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="part-5" role="group" aria-roledescription="slide">
     <p class="chapter-label">05 · After launch</p>
     <h2>Shipping is where looking after it starts</h2>
     <ul>
@@ -217,7 +275,7 @@
     </ul>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="part-6" role="group" aria-roledescription="slide">
     <p class="chapter-label">06 · What it doesn't do</p>
     <h2>Deliberate gaps</h2>
     <ul>
@@ -227,11 +285,30 @@
     </ul>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="part-7" role="group" aria-roledescription="slide">
     <p class="chapter-label">07 · What I learned</p>
     <h2>What building it taught me</h2>
     <div class="todo" data-todo><b>Your notes needed</b>What building TaskSpin taught you, as a PM and as a builder.</div>
   </section>
+
+  </div>
+  </div>
+
+  <nav class="pager" id="pager" aria-label="Story parts" hidden>
+    <button class="pager-arrow" id="prevBtn" type="button" aria-label="Previous part">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="dots" id="dots"></div>
+    <span class="count" id="count" aria-hidden="true"></span>
+    <button class="pager-arrow" id="nextBtn" type="button" aria-label="Next part">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </nav>
+  <p class="story-hint" id="hint" hidden>
+    <span class="hint-mouse">Use the arrows, the dots or your ← → keys to read on</span>
+    <span class="hint-touch">Swipe sideways to read on</span>
+  </p>
+  <p class="sr-only" id="live" aria-live="polite"></p>
 
   <div class="cta">
     <a class="btn-try" href="./">TRY TASKSPIN →</a>
@@ -269,6 +346,91 @@ window.addEventListener('storage', e => {
   if (e.key === THEME_KEY && (e.newValue === 'light' || e.newValue === 'dark')) setTheme(e.newValue);
 });
 setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+
+/* ── Story carousel ──
+   Native horizontal scrolling with snap points does the swiping; this adds the dots,
+   arrows, keys, a link per part (#part-3), and keeps the height to the part in view. */
+const track   = document.getElementById('track');
+const slides  = [...track.querySelectorAll('.chapter')];
+const dotsEl  = document.getElementById('dots');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const countEl = document.getElementById('count');
+const liveEl  = document.getElementById('live');
+const hintEl  = document.getElementById('hint');
+const calm    = window.matchMedia('(prefers-reduced-motion: reduce)');
+const titles  = slides.map(sl => sl.querySelector('.chapter-label').textContent.replace(/^\s*\d+\s*·\s*/, '').trim());
+let current = -1;
+let target  = null;   // part an arrow, dot or key is heading to, while the slide is still moving
+
+slides.forEach((sl, i) => {
+  sl.setAttribute('aria-label', `${i + 1} of ${slides.length}: ${titles[i]}`);
+  const d = document.createElement('button');
+  d.type = 'button'; d.className = 'dot';
+  d.setAttribute('aria-label', `Go to part ${i + 1}: ${titles[i]}`);
+  d.addEventListener('click', () => go(i));
+  dotsEl.appendChild(d);
+});
+const dots = [...dotsEl.children];
+
+// Where part i sits in the row, allowing for the row's side padding on phones.
+const at = i => slides[i].offsetLeft - (parseFloat(getComputedStyle(track).paddingLeft) || 0);
+function go(i, instant) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  target = i;
+  track.scrollTo({ left: at(i), behavior: instant || calm.matches ? 'auto' : 'smooth' });
+}
+// Quick repeated presses add up: count from where we're heading, not from where the slide is now.
+const from = () => (target === null ? current : target);
+function fitHeight() { if (current >= 0) track.style.height = slides[current].offsetHeight + 'px'; }
+function setActive(i) {
+  if (i === target) target = null;   // arrived
+  if (i === current) return;
+  const first = current === -1;
+  current = i;
+  dots.forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
+  prevBtn.disabled = i === 0;
+  nextBtn.disabled = i === slides.length - 1;
+  countEl.textContent = `${i + 1} / ${slides.length}`;
+  fitHeight();
+  if (!first) {
+    liveEl.textContent = `Part ${i + 1} of ${slides.length}: ${titles[i]}`;
+    hintEl.classList.add('gone');
+    history.replaceState(null, '', '#part-' + (i + 1));
+  }
+}
+function nearest() {
+  const x = track.scrollLeft;
+  let best = 0, dist = Infinity;
+  slides.forEach((sl, k) => { const d = Math.abs(at(k) - x); if (d < dist) { dist = d; best = k; } });
+  return best;
+}
+
+let ticking = false;
+track.addEventListener('scroll', () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => { ticking = false; setActive(nearest()); });
+}, { passive: true });
+// A finger, trackpad or wheel on the parts means the reader is steering by hand.
+['pointerdown', 'touchstart', 'wheel'].forEach(ev => track.addEventListener(ev, () => { target = null; }, { passive: true }));
+prevBtn.addEventListener('click', () => go(from() - 1));
+nextBtn.addEventListener('click', () => go(from() + 1));
+document.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(from() + 1); }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); go(from() - 1); }
+});
+window.addEventListener('resize', () => { go(current, true); fitHeight(); });
+
+// open at the part named in the link, if any (…/story.html#part-5)
+const asked = /^#part-(\d+)$/.exec(location.hash);
+const start = asked ? Math.max(0, Math.min(slides.length - 1, +asked[1] - 1)) : 0;
+document.getElementById('pager').hidden = false;
+hintEl.hidden = false;
+setActive(start);
+go(start, true);
+if (document.fonts) document.fonts.ready.then(fitHeight);
 </script>
 </body>
 </html>
