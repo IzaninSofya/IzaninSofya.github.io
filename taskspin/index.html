@@ -322,6 +322,12 @@
     letter-spacing:0.03em; text-align:center;
   }
   .signature .h { color:var(--pop); font-style:normal; }
+  .signature a {
+    color:var(--mid); text-decoration:none;
+    border-bottom:1px solid var(--border);
+    transition:color 0.15s, border-color 0.15s;
+  }
+  .signature a:hover, .signature a:focus-visible { color:var(--pop); border-color:var(--pop); }
 
   /* ── MOBILE RESPONSIVE ── */
   @media (max-width: 600px) {
@@ -521,7 +527,7 @@
   </div>
 </div>
 
-<p class="signature">made with <span class="h">♥</span> by Sofya</p>
+<p class="signature">made with <span class="h">♥</span> by <a href="https://izaninsofya.github.io/">Sofya</a></p>
 
 <script>
 const WHEEL_COLORS = ['#272725','#323230','#2a2a28','#363634','#242423','#2e2e2c','#303030','#282826'];
