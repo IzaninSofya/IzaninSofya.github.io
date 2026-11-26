@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TaskSpin</title>
+<meta name="theme-color" content="#111110">
+<script>
+  // Set the theme before the page is drawn, so it never flashes the wrong one:
+  // the visitor's own choice if they made one, otherwise their device setting.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('taskspin_theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <link rel="preload" href="fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
@@ -35,6 +46,33 @@
     --wheel-label-accent: #d4886a;
     --dot:                #3a3a38;
     --confetti:           #3d3d3a #6b6b68 #9a9a96 #d4d4cf #e8633a #e8633a #f0f0eb;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg:          #f6f5f1;
+    --surface:     #efeee9;
+    --card:        #ffffff;
+    --border:      #dddcd5;
+    --text-muted:  #696964;
+    --text-mid:    #55554f;
+    --text-soft:   #33332f;
+    --text:        #1a1a18;
+    --pop:         #e8633a;
+    --pop-text:    #a83f1b;   /* darker orange, so orange text stays readable on light surfaces */
+    --pop-dim:     rgba(232,99,58,0.12);
+    --on-pop:      #111110;
+    --overlay:      rgba(26,26,24,0.40);
+    --modal-shadow: rgba(0,0,0,0.18);
+    --wheel-shadow: rgba(0,0,0,0.10);
+    --pointer-glow: rgba(232,99,58,0.30);
+    --wheel-slices:       #ecebe6 #e3e2dc #e8e7e1 #dedcd5 #efeee9 #e5e4de #e1e0da #eae9e3;
+    --wheel-accent:       #f9e1d6;
+    --wheel-stroke:       #ffffff;
+    --wheel-label:        #5e5e59;
+    --wheel-label-accent: #a83f1b;
+    --dot:                #c8c6bf;
+    --confetti:           #c8c6bf #9a9a94 #6c6c67 #33332f #e8633a #e8633a #a83f1b;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -69,6 +107,22 @@
     font-size:0.72rem; color:var(--text-muted);
     letter-spacing:0.1em; text-transform:uppercase;
   }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position:absolute; top:16px; right:16px;
+    width:40px; height:40px; border-radius:50%;
+    background:var(--card); border:1px solid var(--border);
+    color:var(--text-mid); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color:var(--pop); color:var(--pop-text); }
+  .theme-toggle:focus-visible { outline:2px solid var(--pop); outline-offset:2px; }
+  .theme-toggle svg { width:18px; height:18px; }
+  /* the icon shows the mode you would switch to */
+  :root:not([data-theme="light"]) .icon-moon,
+  :root[data-theme="light"] .icon-sun { display:none; }
 
   /* ── LAYOUT ── */
   .layout {
@@ -355,6 +409,7 @@
   /* ── MOBILE RESPONSIVE ── */
   @media (max-width: 600px) {
     body { padding:28px 16px 56px; }
+    .theme-toggle { top:12px; right:12px; width:44px; height:44px; }
 
     header { margin-bottom:28px; }
     h1 { font-size:1.25rem; }
@@ -451,6 +506,16 @@
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2"/>
+    <path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20.4 14.6A8.4 8.4 0 0 1 9.4 3.6a8.4 8.4 0 1 0 11 11z"/>
+  </svg>
+</button>
 
 <header>
   <div class="logo">
@@ -731,8 +796,34 @@ canvas.addEventListener('click', openModal);
 document.getElementById('taskInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addTask(); });
 window.addEventListener('resize', drawWheel);
 
+/* ── Theme ── */
+const THEME_KEY = 'taskspin_theme';
+const themeBtn  = document.getElementById('themeToggle');
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const next = t === 'light' ? 'dark' : 'light';
+  themeBtn.setAttribute('aria-label', `Switch to ${next} mode`);
+  themeBtn.title = `Switch to ${next} mode`;
+  readTheme();
+  themeMeta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
+  drawWheel();
+}
+themeBtn.addEventListener('click', () => {
+  const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  setTheme(t);
+});
+// Until someone presses the toggle, keep following the device setting.
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+  let saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch (err) {}
+  if (saved !== 'light' && saved !== 'dark') setTheme(e.matches ? 'light' : 'dark');
+});
+
 renderTasks();
-drawWheel();
+setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'); // also draws the wheel
 
 // Welcome modal — show once per session
 function closeWelcome() {
