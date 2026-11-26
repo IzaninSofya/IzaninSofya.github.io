@@ -553,7 +553,7 @@ function drawWheel() {
     ctx.fillText('add tasks to spin', cx, cy);
     return;
   }
-  drawSlices(size, 0);
+  drawSlices(size, rotation*Math.PI/180);
 }
 
 function drawSlices(size, rotOffset) {
@@ -638,7 +638,10 @@ function spin() {
   const sliceDeg=360/tasks.length;
   const winIdx=Math.floor(Math.random()*tasks.length);
   const extra=6+Math.floor(Math.random()*4);
-  const target=extra*360+(360-winIdx*sliceDeg-sliceDeg/2);
+  // Land the middle of the winning slice under the pointer at 12 o'clock
+  // (270° on the canvas), counting from wherever the last spin left the wheel.
+  const settle=((270-(winIdx+0.5)*sliceDeg-rotation)%360+360)%360;
+  const target=extra*360+settle;
 
   const startR=rotation, endR=rotation+target;
   const dur=4300, t0=performance.now();
