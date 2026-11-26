@@ -7,24 +7,41 @@
 <link rel="preload" href="fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
+  /* Colours are named by role, so a theme only has to swap values.
+     Every text colour reaches at least 4.5:1 contrast on the surfaces it sits on. */
   :root {
-    --black:   #111110;
-    --surface: #1c1c1b;
-    --card:    #222221;
-    --border:  #2e2e2c;
-    --muted:   #6b6b68;
-    --mid:     #9a9a96;
-    --light:   #d4d4cf;
-    --white:   #f0f0eb;
-    --pop:     #e8633a;
-    --pop-dim: rgba(232,99,58,0.10);
+    color-scheme: dark;
+    --bg:          #111110;
+    --surface:     #1c1c1b;
+    --card:        #222221;
+    --border:      #2e2e2c;
+    --text-muted:  #8c8c87;
+    --text-mid:    #9a9a96;
+    --text-soft:   #d4d4cf;
+    --text:        #f0f0eb;
+    --pop:         #e8633a;   /* orange fills, borders, pointer */
+    --pop-text:    #e8633a;   /* orange used for text */
+    --pop-dim:     rgba(232,99,58,0.10);
+    --on-pop:      #111110;   /* text on orange buttons */
+    --overlay:      rgba(0,0,0,0.75);
+    --modal-shadow: rgba(0,0,0,0.65);
+    --wheel-shadow: rgba(0,0,0,0.55);
+    --pointer-glow: rgba(232,99,58,0.45);
+    /* read by the script each time the wheel and confetti are drawn */
+    --wheel-slices:       #272725 #323230 #2a2a28 #363634 #242423 #2e2e2c #303030 #282826;
+    --wheel-accent:       #261a16;
+    --wheel-stroke:       #111110;
+    --wheel-label:        #a1a19c;
+    --wheel-label-accent: #d4886a;
+    --dot:                #3a3a38;
+    --confetti:           #3d3d3a #6b6b68 #9a9a96 #d4d4cf #e8633a #e8633a #f0f0eb;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
-    background: var(--black);
-    color: var(--white);
+    background: var(--bg);
+    color: var(--text);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     display: flex;
@@ -45,11 +62,11 @@
 
   h1 {
     font-size:1.45rem; font-weight:600;
-    letter-spacing:-0.4px; color:var(--white);
+    letter-spacing:-0.4px; color:var(--text);
   }
 
   .subtitle {
-    font-size:0.72rem; color:var(--muted);
+    font-size:0.72rem; color:var(--text-muted);
     letter-spacing:0.1em; text-transform:uppercase;
   }
 
@@ -77,13 +94,13 @@
     transform:translateX(-50%);
     width:22px; height:30px; z-index:10;
     color:var(--pop);
-    filter:drop-shadow(0 2px 6px rgba(232,99,58,0.45));
+    filter:drop-shadow(0 2px 6px var(--pointer-glow));
   }
 
   #wheel {
     width:100%; height:100%; border-radius:50%;
     display:block; cursor:pointer;
-    box-shadow:0 0 0 1px var(--border), 0 8px 48px rgba(0,0,0,0.55);
+    box-shadow:0 0 0 1px var(--border), 0 8px 48px var(--wheel-shadow);
   }
   #wheel.spinning { cursor:not-allowed; }
 
@@ -91,16 +108,16 @@
     position:absolute; top:50%; left:50%;
     transform:translate(-50%,-50%);
     width:70px; height:70px; border-radius:50%;
-    background:var(--black);
+    background:var(--bg);
     border:1px solid var(--border);
-    color:var(--mid);
+    color:var(--text-mid);
     cursor:pointer; z-index:10;
     display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:4px;
     transition:all 0.2s ease;
   }
   .center-btn:hover:not(:disabled) {
-    border-color:var(--pop); color:var(--pop);
+    border-color:var(--pop); color:var(--pop-text);
     background:var(--pop-dim);
   }
   .center-btn:disabled { opacity:0.3; cursor:not-allowed; }
@@ -123,15 +140,15 @@
   .result-banner.visible { opacity:1; transform:translateY(0); pointer-events:auto; }
   .result-label {
     font-size:0.66rem; text-transform:uppercase;
-    letter-spacing:0.1em; color:var(--pop);
+    letter-spacing:0.1em; color:var(--pop-text);
     font-weight:500; margin-bottom:5px;
   }
   .result-task {
     font-size:1rem; font-weight:500;
-    color:var(--white); word-break:break-word;
+    color:var(--text); word-break:break-word;
   }
 
-  .spin-hint { font-size:0.7rem; color:var(--muted); letter-spacing:0.03em; }
+  .spin-hint { font-size:0.7rem; color:var(--text-muted); letter-spacing:0.03em; }
 
   /* ── TASKS SECTION ── */
   .tasks-section {
@@ -147,13 +164,13 @@
   .card-title {
     font-size:0.68rem; font-weight:500;
     text-transform:uppercase; letter-spacing:0.1em;
-    color:var(--muted); margin-bottom:14px;
+    color:var(--text-muted); margin-bottom:14px;
     display:flex; align-items:center; justify-content:space-between;
   }
 
   .count-badge {
     background:var(--surface); border:1px solid var(--border);
-    color:var(--mid); border-radius:20px;
+    color:var(--text-mid); border-radius:20px;
     padding:1px 8px; font-size:0.62rem;
     font-family:'DM Mono',monospace;
   }
@@ -164,15 +181,15 @@
     flex:1; min-width:0;
     background:var(--surface); border:1px solid var(--border);
     border-radius:7px; padding:9px 12px;
-    color:var(--white); font-family:'DM Sans',sans-serif;
+    color:var(--text); font-family:'DM Sans',sans-serif;
     font-size:0.86rem; outline:none;
     transition:border-color 0.2s;
   }
-  .task-input::placeholder { color:var(--muted); }
+  .task-input::placeholder { color:var(--text-muted); }
   .task-input:focus { border-color:var(--pop); }
 
   .add-btn {
-    background:var(--pop); color:var(--white);
+    background:var(--pop); color:var(--on-pop);
     border:none; border-radius:7px;
     padding:9px 14px; flex-shrink:0;
     font-family:'DM Mono',monospace; font-size:0.72rem;
@@ -183,7 +200,7 @@
 
   .storage-note {
     margin-top:12px; font-size:0.7rem;
-    line-height:1.6; color:var(--muted);
+    line-height:1.6; color:var(--text-muted);
   }
 
   .task-list {
@@ -207,45 +224,46 @@
   .task-item:hover { border-color:var(--border); }
   .task-item.winner { border-color:var(--pop); background:var(--pop-dim); }
 
-  .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-  .task-name { flex:1; font-size:0.83rem; color:var(--light); word-break:break-word; }
+  .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; background:var(--dot); }
+  .dot.accent { background:var(--pop); }
+  .task-name { flex:1; font-size:0.83rem; color:var(--text-soft); word-break:break-word; }
 
   .task-done-btn {
     background:none; border:1px solid var(--border);
-    color:var(--muted); border-radius:4px;
+    color:var(--text-muted); border-radius:4px;
     padding:2px 7px; font-size:0.66rem;
     cursor:pointer; font-family:'DM Sans',sans-serif;
     font-weight:500; letter-spacing:0.04em;
     transition:all 0.15s; white-space:nowrap;
   }
-  .task-done-btn:hover { border-color:var(--pop); color:var(--pop); }
+  .task-done-btn:hover { border-color:var(--pop); color:var(--pop-text); }
 
   .task-del-btn {
-    background:none; border:none; color:var(--muted);
+    background:none; border:none; color:var(--text-muted);
     cursor:pointer; font-size:1rem; line-height:1;
     padding:0 2px; transition:color 0.15s; flex-shrink:0;
   }
-  .task-del-btn:hover { color:var(--white); }
+  .task-del-btn:hover { color:var(--text); }
 
   .empty-state {
-    text-align:center; color:var(--muted);
+    text-align:center; color:var(--text-muted);
     font-size:0.8rem; padding:20px 0; line-height:2;
   }
 
   .clear-btn {
     width:100%; background:none;
-    border:1px solid var(--border); color:var(--muted);
+    border:1px solid var(--border); color:var(--text-muted);
     border-radius:6px; padding:7px;
     font-family:'DM Sans',sans-serif; font-size:0.74rem;
     cursor:pointer; margin-top:10px; transition:all 0.2s;
     letter-spacing:0.04em;
   }
-  .clear-btn:hover { border-color:var(--mid); color:var(--light); }
+  .clear-btn:hover { border-color:var(--text-mid); color:var(--text-soft); }
 
   /* ── MODAL ── */
   .modal-overlay {
     position:fixed; inset:0;
-    background:rgba(0,0,0,0.75);
+    background:var(--overlay);
     backdrop-filter:blur(6px);
     z-index:200; display:flex;
     align-items:center; justify-content:center;
@@ -260,7 +278,7 @@
     width:min(360px,90vw); text-align:center;
     transform:translateY(14px) scale(0.97);
     transition:transform 0.25s ease;
-    box-shadow:0 32px 80px rgba(0,0,0,0.65);
+    box-shadow:0 32px 80px var(--modal-shadow);
   }
   .modal-overlay.open .modal { transform:translateY(0) scale(1); }
 
@@ -268,11 +286,11 @@
 
   .modal-title {
     font-size:1.05rem; font-weight:600;
-    color:var(--white); margin-bottom:7px; letter-spacing:-0.2px;
+    color:var(--text); margin-bottom:7px; letter-spacing:-0.2px;
   }
 
   .modal-body {
-    font-size:0.82rem; color:var(--mid);
+    font-size:0.82rem; color:var(--text-mid);
     line-height:1.65; margin-bottom:20px;
   }
 
@@ -286,7 +304,7 @@
   .modal-preview span {
     display:inline-block;
     background:var(--card); border:1px solid var(--border);
-    color:var(--mid); border-radius:4px;
+    color:var(--text-mid); border-radius:4px;
     padding:2px 7px; font-size:0.75rem;
     font-family:'DM Mono',monospace;
   }
@@ -295,15 +313,15 @@
 
   .btn-cancel {
     flex:1; background:none; border:1px solid var(--border);
-    color:var(--mid); border-radius:8px; padding:11px;
+    color:var(--text-mid); border-radius:8px; padding:11px;
     font-family:'DM Sans',sans-serif; font-size:0.84rem;
     cursor:pointer; transition:all 0.15s; font-weight:500;
   }
-  .btn-cancel:hover { border-color:var(--mid); color:var(--light); }
+  .btn-cancel:hover { border-color:var(--text-mid); color:var(--text-soft); }
 
   .btn-spin {
     flex:2; background:var(--pop); border:none;
-    color:var(--white); border-radius:8px; padding:11px;
+    color:var(--on-pop); border-radius:8px; padding:11px;
     font-family:'DM Mono',monospace; font-size:0.8rem;
     letter-spacing:0.09em; cursor:pointer;
     transition:opacity 0.15s; font-weight:500;
@@ -323,16 +341,16 @@
   /* ── SIGNATURE ── */
   .signature {
     margin-top:52px; font-size:0.7rem;
-    color:var(--muted); font-style:italic;
+    color:var(--text-muted); font-style:italic;
     letter-spacing:0.03em; text-align:center;
   }
-  .signature .h { color:var(--pop); font-style:normal; }
+  .signature .h { color:var(--pop-text); font-style:normal; }
   .signature a {
-    color:var(--mid); text-decoration:none;
+    color:var(--text-mid); text-decoration:none;
     border-bottom:1px solid var(--border);
     transition:color 0.15s, border-color 0.15s;
   }
-  .signature a:hover, .signature a:focus-visible { color:var(--pop); border-color:var(--pop); }
+  .signature a:hover, .signature a:focus-visible { color:var(--pop-text); border-color:var(--pop); }
 
   /* ── MOBILE RESPONSIVE ── */
   @media (max-width: 600px) {
@@ -414,17 +432,17 @@
   /* ── WELCOME MODAL ── */
   .welcome-emoji { font-size:2rem; margin-bottom:14px; display:block; }
   .welcome-title {
-    font-size:1.05rem; font-weight:600; color:var(--white);
+    font-size:1.05rem; font-weight:600; color:var(--text);
     margin-bottom:10px; letter-spacing:-0.2px;
   }
   .welcome-body {
-    font-size:0.84rem; color:var(--mid); line-height:1.75;
+    font-size:0.84rem; color:var(--text-mid); line-height:1.75;
     margin-bottom:24px;
   }
-  .welcome-body strong { color:var(--light); font-weight:500; }
+  .welcome-body strong { color:var(--text-soft); font-weight:500; }
   .btn-got-it {
     width:100%; background:var(--pop); border:none;
-    color:var(--white); border-radius:8px; padding:12px;
+    color:var(--on-pop); border-radius:8px; padding:12px;
     font-family:'DM Mono',monospace; font-size:0.8rem;
     letter-spacing:0.08em; cursor:pointer;
     transition:opacity 0.15s; font-weight:500;
@@ -536,8 +554,19 @@
 <p class="signature">made with <span class="h">♥</span> by <a href="https://izaninsofya.github.io/">Sofya</a></p>
 
 <script>
-const WHEEL_COLORS = ['#272725','#323230','#2a2a28','#363634','#242423','#2e2e2c','#303030','#282826'];
-const POP = '#e8633a';
+// Colours live in the CSS theme. Read them before drawing, so a theme change applies at once.
+let C = {};
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = n => cs.getPropertyValue(n).trim();
+  C = {
+    slices: v('--wheel-slices').split(/\s+/), accent: v('--wheel-accent'), stroke: v('--wheel-stroke'),
+    label: v('--wheel-label'), labelAccent: v('--wheel-label-accent'),
+    emptyFill: v('--surface'), emptyBorder: v('--border'), emptyText: v('--text-muted'),
+    confetti: v('--confetti').split(/\s+/)
+  };
+}
+readTheme();
 
 let tasks = JSON.parse(localStorage.getItem('taskspin_v2') || '[]');
 let rotation = 0;
@@ -548,7 +577,7 @@ const canvas = document.getElementById('wheel');
 const ctx    = canvas.getContext('2d');
 
 const save = () => localStorage.setItem('taskspin_v2', JSON.stringify(tasks));
-const wc   = i => WHEEL_COLORS[i % WHEEL_COLORS.length];
+const wc   = i => C.slices[i % C.slices.length];
 
 function drawWheel() {
   const size = canvas.offsetWidth || 320;
@@ -558,9 +587,9 @@ function drawWheel() {
 
   if (!tasks.length) {
     ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.fillStyle='#1c1c1b'; ctx.fill();
-    ctx.strokeStyle='#2e2e2c'; ctx.lineWidth=1; ctx.stroke();
-    ctx.fillStyle='#6b6b68';
+    ctx.fillStyle=C.emptyFill; ctx.fill();
+    ctx.strokeStyle=C.emptyBorder; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle=C.emptyText;
     ctx.font=`400 ${Math.min(size*0.052,14)}px DM Sans,sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText('add tasks to spin', cx, cy);
@@ -576,15 +605,15 @@ function drawSlices(size, rotOffset) {
     const s=i*slice+rotOffset, e=s+slice, m=s+slice/2;
     const accent = (i % 4 === 0);
     ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,s,e); ctx.closePath();
-    ctx.fillStyle = accent ? '#261a16' : wc(i); ctx.fill();
-    ctx.strokeStyle='#111110'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle = accent ? C.accent : wc(i); ctx.fill();
+    ctx.strokeStyle=C.stroke; ctx.lineWidth=1.5; ctx.stroke();
     ctx.save();
     ctx.translate(cx,cy); ctx.rotate(m);
     const label=task.name.length>13?task.name.slice(0,13)+'…':task.name;
     const fs=Math.min(size*0.035,13);
     ctx.font=`500 ${fs}px DM Sans,sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillStyle = accent ? '#d4886a' : '#7a7a76';
+    ctx.fillStyle = accent ? C.labelAccent : C.label;
     ctx.fillText(label, r*0.6, 0);
     ctx.restore();
   });
@@ -602,7 +631,7 @@ function renderTasks() {
   }
   list.innerHTML = tasks.map((t,i)=>`
     <div class="task-item" id="task-${i}">
-      <span class="dot" style="background:${i%4===0?POP:'#3a3a38'}"></span>
+      <span class="dot${i%4===0?' accent':''}"></span>
       <span class="task-name">${esc(t.name)}</span>
       <button class="task-done-btn" onclick="markDone(${i})">done</button>
       <button class="task-del-btn" onclick="deleteTask(${i})">×</button>
@@ -688,7 +717,7 @@ function showResult(i) {
 }
 
 function confetti() {
-  const pal=['#3d3d3a','#6b6b68','#9a9a96','#d4d4cf',POP,POP,'#f0f0eb'];
+  const pal=C.confetti;
   for (let i=0;i<55;i++) {
     const el=document.createElement('div');
     el.className='cp';
