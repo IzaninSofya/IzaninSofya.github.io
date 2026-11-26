@@ -181,6 +181,11 @@
   }
   .add-btn:hover { opacity:0.85; }
 
+  .storage-note {
+    margin-top:12px; font-size:0.7rem;
+    line-height:1.6; color:var(--muted);
+  }
+
   .task-list {
     display:flex; flex-direction:column; gap:5px;
     max-height:290px; overflow-y:auto; padding-right:2px;
@@ -480,6 +485,7 @@
         <input class="task-input" id="taskInput" type="text" placeholder="What needs doing…" maxlength="50"/>
         <button class="add-btn" onclick="addTask()">ADD</button>
       </div>
+      <p class="storage-note">Your tasks stay in this browser. Nothing is sent anywhere. Clearing your browsing data, or closing a private window, deletes them.</p>
     </div>
 
     <div class="card">
