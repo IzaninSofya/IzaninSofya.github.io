@@ -130,17 +130,6 @@
   }
   blockquote strong { color:var(--text-soft); font-weight:500; font-style:normal; }
 
-  /* Placeholder for Sofya's own words. Must all be replaced before this page is published. */
-  .todo {
-    border:1px dashed var(--pop); border-radius:8px;
-    padding:12px 14px; margin-top:12px;
-    font-size:0.84rem; line-height:1.6; color:var(--text-soft);
-  }
-  .todo b {
-    display:block; font-family:'DM Mono', monospace; font-weight:500;
-    font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase;
-    color:var(--pop-text); margin-bottom:4px;
-  }
 
   /* ── CALL TO ACTION ── */
   .cta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin-top:26px; }
@@ -223,19 +212,27 @@
       Every PM morning starts the same way: a list too long, a brain not quite ready, and the
       quiet question of where to start.
     </p>
-    <div class="todo" data-todo><b>Your notes needed</b>What a typical PM morning looked like for you, anonymised: the competing asks, and what deciding where to start actually cost.</div>
+    <ul>
+      <li>Customer support flags unhappy users after the latest update rolled out.</li>
+      <li>A stakeholder asks for a new feature, because a competitor has just launched it.</li>
+      <li>The ops team needs an internal system built, while the developers are already stretched.</li>
+    </ul>
+    <p>Each one is urgent to someone. They can't all come first.</p>
   </section>
 
   <section class="chapter" id="part-2" role="group" aria-roledescription="slide">
     <p class="chapter-label">02 · Prioritise first, spin second</p>
     <h2>The wheel only gets what survived my judgement</h2>
+    <p>A wheel is a terrible way to set priorities, and that's the point.</p>
     <p>
-      A wheel is a terrible way to set priorities, and that's the point. Before anything goes on
-      TaskSpin, it has already been through the real work: what's urgent, what matters, what can
-      wait, and what can be dropped. The wheel only gets the tasks that are left and roughly
-      equal, where the hard part isn't choosing but starting.
+      I don't follow a named framework. I weigh the impact of each item, take it to my direct
+      manager for their insight and the decision, and make the trade-offs clear, so everyone
+      knows what waits and why.
     </p>
-    <div class="todo" data-todo><b>Your notes needed</b>The prioritisation methods you actually use (for example the Eisenhower matrix, MoSCoW or RICE), and one moment where getting the priority right or wrong mattered. No company names or internal details.</div>
+    <p>
+      Only what's left after that, the tasks that are roughly equal, goes on the wheel. By then
+      the hard part isn't choosing. It's starting.
+    </p>
   </section>
 
   <section class="chapter" id="part-3" role="group" aria-roledescription="slide">
@@ -287,8 +284,28 @@
 
   <section class="chapter" id="part-7" role="group" aria-roledescription="slide">
     <p class="chapter-label">07 · What I learned</p>
-    <h2>What building it taught me</h2>
-    <div class="todo" data-todo><b>Your notes needed</b>What building TaskSpin taught you, as a PM and as a builder.</div>
+    <h2>Accountable doesn't mean alone</h2>
+    <p>
+      The longer I work in product, the more I realise I don't need an answer to everything. That
+      wasn't easy to accept. I was used to investigating, experimenting and solving problems myself.
+    </p>
+    <p>
+      But clients want answers now, teams wait on decisions, and I'm often caught between what's
+      technically possible, what the business expects and what's already been promised. So I've
+      learned to say "I need to discuss this with the team before committing", or simply "I don't
+      have the answer yet". A quick answer isn't always the right one. I still feel the pressure,
+      and I don't always get the balance right, but being accountable for a decision doesn't mean
+      making it alone.
+    </p>
+    <p>
+      Operations taught me the other half: understand the problem before designing the solution.
+      What are people actually struggling with? Is it a process issue, a technology gap, or both?
+      What happens when the solution meets real-world exceptions?
+    </p>
+    <blockquote>
+      Great products aren't designed only around what technology can do. They're designed around
+      what people actually need to accomplish.
+    </blockquote>
   </section>
 
   </div>
@@ -378,7 +395,14 @@ const at = i => slides[i].offsetLeft - (parseFloat(getComputedStyle(track).paddi
 function go(i, instant) {
   i = Math.max(0, Math.min(slides.length - 1, i));
   target = i;
-  track.scrollTo({ left: at(i), behavior: instant || calm.matches ? 'auto' : 'smooth' });
+  if (instant || calm.matches) {
+    // jump without sliding: switch the CSS smooth scrolling off for this one move
+    track.style.scrollBehavior = 'auto';
+    track.scrollLeft = at(i);
+    track.style.scrollBehavior = '';
+  } else {
+    track.scrollTo({ left: at(i), behavior: 'smooth' });
+  }
 }
 // Quick repeated presses add up: count from where we're heading, not from where the slide is now.
 const from = () => (target === null ? current : target);
